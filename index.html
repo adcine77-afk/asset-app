@@ -522,28 +522,7 @@
           <div class="ta-di-sub" id="taPensionSub">—</div>
           <div style="margin-top:8px;display:grid;gap:5px">
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-              <span style="font-size:11px;color:var(--text-muted);width:100px">기준 수령액</span>
-              <input type="number" id="taPensionMonthly" placeholder="1901000" step="10000"
-                     style="flex:1;min-width:110px;padding:4px 7px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:inherit"
-                     oninput="calcPension()">
-              <span style="font-size:11px;color:var(--text-muted)">원/월</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-              <span style="font-size:11px;color:var(--text-muted);width:100px">현재 납부월수</span>
-              <input type="number" id="taPensionCurMonths" placeholder="291" step="1" min="0"
-                     style="flex:1;min-width:70px;padding:4px 7px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:inherit"
-                     oninput="calcPension()">
-              <span style="font-size:11px;color:var(--text-muted)">개월</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-              <span style="font-size:11px;color:var(--text-muted);width:100px">만 60세까지 총</span>
-              <input type="number" id="taPensionFullMonths" placeholder="425" step="1" min="1"
-                     style="flex:1;min-width:70px;padding:4px 7px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:inherit"
-                     oninput="calcPension()">
-              <span style="font-size:11px;color:var(--text-muted)">개월 납부 시</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-              <span style="font-size:11px;color:var(--text-muted);width:100px">수령 시작 연도</span>
+              <span style="font-size:11px;color:var(--text-muted);width:100px">연금 수령 연도</span>
               <input type="number" id="taPensionYear" placeholder="2042" step="1" min="2030" max="2060"
                      style="flex:1;min-width:70px;padding:4px 7px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:inherit"
                      oninput="calcPension()">
@@ -2338,12 +2317,12 @@ function loadPublicAssets() {
   try {
     const s = localStorage.getItem(PUBLIC_ASSETS_KEY);
     return s ? JSON.parse(s) : {
-      pensionMonthly: 1901000, pensionCurMonths: 291, pensionFullMonths: 425, pensionYear: 2042,
+      pensionYear: 2042,
       monthSalary: 0, joinDate: '2022-09-01', retireDate: '2031-09-01'
     };
   } catch {
     return {
-      pensionMonthly: 1901000, pensionCurMonths: 291, pensionFullMonths: 425, pensionYear: 2042,
+      pensionYear: 2042,
       monthSalary: 0, joinDate: '2022-09-01', retireDate: '2031-09-01'
     };
   }
@@ -2352,11 +2331,11 @@ function loadPublicAssets() {
 // 국민연금 수령액 자동 조정 계산
 // 은퇴일까지 추가 납부 → 실제 납부 월수 계산 → 비례 조정
 function calcPension() {
-  // DOM 입력값 우선, 없으면 localStorage 저장값 사용 (페이지 로드 시 타이밍 문제 방지)
+  // 기준값 고정 (내연금.kr 조회 결과 기준, 변경 불필요)
+  const base       = 1901000;   // 만 60세까지 납부 시 예상 월 수령액
+  const curMonths  = 291;       // 현재 납부 완료 개월수
+  const fullMonths = 425;       // 만 60세까지 총 납부 개월수
   const pa0        = loadPublicAssets();
-  const base       = parseFloat(document.getElementById('taPensionMonthly')?.value)    || pa0.pensionMonthly    || 1901000;
-  const curMonths  = parseInt(document.getElementById('taPensionCurMonths')?.value)    || pa0.pensionCurMonths  || 291;
-  const fullMonths = parseInt(document.getElementById('taPensionFullMonths')?.value)   || pa0.pensionFullMonths || 425;
   const pensionYear= parseInt(document.getElementById('taPensionYear')?.value)         || pa0.pensionYear       || 2042;
   const retireDate = document.getElementById('taRetireDate')?.value                    || pa0.retireDate        || '2031-09-01';
 
@@ -2387,9 +2366,6 @@ function calcPension() {
 
   // localStorage 저장
   const pa = loadPublicAssets();
-  pa.pensionMonthly   = base;
-  pa.pensionCurMonths = curMonths;
-  pa.pensionFullMonths= fullMonths;
   pa.pensionYear      = pensionYear;
   pa.pensionAdjusted  = adjusted;   // 조정된 실제 수령액
   localStorage.setItem(PUBLIC_ASSETS_KEY, JSON.stringify(pa));
@@ -2449,14 +2425,8 @@ function savePublicAssets() {
 function renderPublicAssets(pa) {
   if (!pa) pa = loadPublicAssets();
 
-  // 국민연금 입력란 복원
-  const pmEl  = document.getElementById('taPensionMonthly');
-  const pcmEl = document.getElementById('taPensionCurMonths');
-  const pfmEl = document.getElementById('taPensionFullMonths');
+  // 국민연금 입력란 복원 (연금 수령 연도만 입력)
   const pyEl  = document.getElementById('taPensionYear');
-  if (pmEl  && !pmEl.value)  pmEl.value  = pa.pensionMonthly    || 1901000;
-  if (pcmEl && !pcmEl.value) pcmEl.value = pa.pensionCurMonths  || 291;
-  if (pfmEl && !pfmEl.value) pfmEl.value = pa.pensionFullMonths || 425;
   if (pyEl  && !pyEl.value)  pyEl.value  = pa.pensionYear       || 2042;
 
   // 퇴직금 관련 입력란 복원
