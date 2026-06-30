@@ -1,9 +1,91 @@
 {
-  "updated": "",
-  "note": "GitHub Actions에 의해 자동 업데이트됩니다. 아직 첫 실행 전입니다.",
+  "updated": "2026-06-30T15:27:15+09:00",
+  "note": "본 데이터는 자동 수집된 참고용 데이터입니다. 지연되거나 부정확할 수 있습니다.",
   "sources": {
-    "korea": "네이버 금융 모바일 API",
-    "us": "Yahoo Finance 공개 API"
+    "korea": "네이버 금융 모바일 API (m.stock.naver.com)",
+    "us": "Yahoo Finance 공개 API (query2.finance.yahoo.com)"
   },
-  "prices": {}
+  "prices": {
+    "삼성전자": {
+      "price": 336000.0,
+      "currency": "KRW",
+      "code": "005930",
+      "source": "네이버금융"
+    },
+    "SK하이닉스": {
+      "price": 2676000.0,
+      "currency": "KRW",
+      "code": "000660",
+      "source": "네이버금융"
+    },
+    "두산에너빌리티": {
+      "price": 87000.0,
+      "currency": "KRW",
+      "code": "034020",
+      "source": "네이버금융"
+    },
+    "TIGER 미국나스닥100": {
+      "price": 204915.0,
+      "currency": "KRW",
+      "code": "133690",
+      "source": "네이버금융"
+    },
+    "TIGER 나스닥100": {
+      "price": 204915.0,
+      "currency": "KRW",
+      "code": "133690",
+      "source": "네이버금융"
+    },
+    "KODEX 미국S&P500": {
+      "price": 26095.0,
+      "currency": "KRW",
+      "code": "379800",
+      "source": "네이버금융"
+    },
+    "KODEX 미국10년국채액티브(H)": {
+      "price": 7630.0,
+      "currency": "KRW",
+      "code": "304660",
+      "source": "네이버금융"
+    },
+    "ACE 반도체TOP4Plus": {
+      "price": 51020.0,
+      "currency": "KRW",
+      "code": "396500",
+      "source": "네이버금융"
+    },
+    "KODEX SMR": {
+      "price": 27300.0,
+      "currency": "KRW",
+      "code": "411060",
+      "source": "네이버금융"
+    },
+    "KODEX200": {
+      "price": 138580.0,
+      "currency": "KRW",
+      "code": "069500",
+      "source": "네이버금융"
+    },
+    "RISE 코리아밸류업": {
+      "price": 31955.0,
+      "currency": "KRW",
+      "code": "466920",
+      "source": "네이버금융"
+    },
+    "NVDA": {
+      "price": 194.97,
+      "currency": "USD",
+      "source": "Yahoo Finance"
+    },
+    "PLTR": {
+      "price": 115.7,
+      "currency": "USD",
+      "source": "Yahoo Finance"
+    },
+    "IONQ": {
+      "price": 53.88,
+      "currency": "USD",
+      "source": "Yahoo Finance"
+    }
+  }
 }
