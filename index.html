@@ -2352,11 +2352,13 @@ function loadPublicAssets() {
 // 국민연금 수령액 자동 조정 계산
 // 은퇴일까지 추가 납부 → 실제 납부 월수 계산 → 비례 조정
 function calcPension() {
-  const base       = parseFloat(document.getElementById('taPensionMonthly')?.value     || '0') || 1901000;
-  const curMonths  = parseInt(document.getElementById('taPensionCurMonths')?.value     || '0') || 291;
-  const fullMonths = parseInt(document.getElementById('taPensionFullMonths')?.value    || '0') || 425;
-  const pensionYear= parseInt(document.getElementById('taPensionYear')?.value          || '0') || 2042;
-  const retireDate = document.getElementById('taRetireDate')?.value || '2031-09-01';
+  // DOM 입력값 우선, 없으면 localStorage 저장값 사용 (페이지 로드 시 타이밍 문제 방지)
+  const pa0        = loadPublicAssets();
+  const base       = parseFloat(document.getElementById('taPensionMonthly')?.value)    || pa0.pensionMonthly    || 1901000;
+  const curMonths  = parseInt(document.getElementById('taPensionCurMonths')?.value)    || pa0.pensionCurMonths  || 291;
+  const fullMonths = parseInt(document.getElementById('taPensionFullMonths')?.value)   || pa0.pensionFullMonths || 425;
+  const pensionYear= parseInt(document.getElementById('taPensionYear')?.value)         || pa0.pensionYear       || 2042;
+  const retireDate = document.getElementById('taRetireDate')?.value                    || pa0.retireDate        || '2031-09-01';
 
   // 지금부터 은퇴일까지 추가 납부 개월수 계산
   const today        = new Date();
