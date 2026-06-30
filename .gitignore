@@ -1,0 +1,20 @@
+# 운영체제 임시파일
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+venv/
+.venv/
+
+# 에디터
+.vscode/
+*.swp
+*.swo
+
+# Claude Code 임시 파일
+.claude/launch.json

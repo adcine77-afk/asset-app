@@ -1,0 +1,9 @@
+{
+  "updated": "",
+  "note": "GitHub Actions에 의해 자동 업데이트됩니다. 아직 첫 실행 전입니다.",
+  "sources": {
+    "korea": "네이버 금융 모바일 API",
+    "us": "Yahoo Finance 공개 API"
+  },
+  "prices": {}
+}

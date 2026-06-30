@@ -1,0 +1,39 @@
+name: 시세 자동 갱신
+
+on:
+  schedule:
+    # 한국시간 오전 9시 10분 (UTC 00:10)
+    - cron: '10 0 * * 1-5'
+    # 한국시간 오후 3시 40분 (UTC 06:40) — 한국 증시 마감 직후
+    - cron: '40 6 * * 1-5'
+  workflow_dispatch:   # 수동 실행 허용 (GitHub Actions 탭에서 "Run workflow" 클릭 가능)
+
+jobs:
+  update-prices:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # prices.json 커밋 권한
+
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Python 설치
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 의존성 설치
+        run: pip install -r requirements.txt
+
+      - name: 시세 수집 실행
+        run: python update_prices.py
+
+      - name: prices.json 자동 커밋 & 푸시
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add prices.json
+          # 변경사항이 있을 때만 커밋 (없으면 건너뜀)
+          git diff --staged --quiet || git commit -m "자동 시세 업데이트: $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M') KST"
+          git push
