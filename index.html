@@ -453,6 +453,11 @@
   .ta-di-value { font-size:15px; font-weight:700; }
   .ta-di-sub   { font-size:11px; color:var(--text-muted); margin-top:2px; }
   .ta-savings-row { display:flex; align-items:center; gap:10px; margin-top:12px; flex-wrap:wrap; }
+  .ta-public-section { margin-top:14px; padding-top:12px; border-top:1px solid var(--border); }
+  .ta-public-title { font-size:13px; font-weight:700; color:#7c3aed; margin-bottom:10px; }
+  .ta-public-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .ta-public-item { background:#faf5ff; border:1px solid #e9d5ff; border-radius:8px; padding:12px; }
+  @media(max-width:600px) { .ta-public-grid { grid-template-columns:1fr; } }
   @media(max-width:600px) { .ta-detail-grid { grid-template-columns:1fr; } #taSummaryText { font-size:13px; } }
 
   /* 반응형 */
@@ -507,8 +512,48 @@
         <div class="ta-di-sub" id="taCashSub">—</div>
       </div>
     </div>
+    <!-- 공적자산 (순자산 합계에 포함 안 됨 — 미래 소득 흐름) -->
+    <div class="ta-public-section">
+      <div class="ta-public-title">🏛️ 공적자산 <span style="font-size:11px;font-weight:400;color:var(--text-muted)">— 순자산 합계에는 미포함 (미래 소득 흐름)</span></div>
+      <div class="ta-public-grid">
+        <div class="ta-public-item">
+          <div class="ta-di-label">국민연금 예상 월 수령액</div>
+          <div class="ta-di-value" id="taPensionDisp" style="color:#7c3aed">—</div>
+          <div class="ta-di-sub" id="taPensionSub">—</div>
+          <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+            <input type="number" id="taPensionMonthly" placeholder="1901000" step="10000"
+                   style="width:130px;padding:4px 7px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:inherit"
+                   onchange="savePublicAssets()">
+            <span style="font-size:11px;color:var(--text-muted)">원/월</span>
+            <input type="number" id="taPensionYear" placeholder="2042" step="1" min="2030" max="2060"
+                   style="width:70px;padding:4px 7px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:inherit"
+                   onchange="savePublicAssets()">
+            <span style="font-size:11px;color:var(--text-muted)">년부터</span>
+          </div>
+        </div>
+        <div class="ta-public-item">
+          <div class="ta-di-label">퇴직금 예상액 (IRP 이전)</div>
+          <div class="ta-di-value" id="taRetireDisp" style="color:#0369a1">—</div>
+          <div class="ta-di-sub">은퇴 시 IRP 계좌에 이전 예정</div>
+          <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+            <input type="number" id="taRetirePay" placeholder="0" step="1000000"
+                   style="width:140px;padding:4px 7px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:inherit"
+                   onchange="savePublicAssets()">
+            <span style="font-size:11px;color:var(--text-muted)">원 (직접 입력)</span>
+          </div>
+        </div>
+        <div class="ta-public-item" style="background:#f0fdf4">
+          <div class="ta-di-label">⏳ 은퇴 준비 요약</div>
+          <div id="taRetireSummary" style="font-size:12px;line-height:1.8;margin-top:4px;color:var(--text)"></div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#92400e;background:#fef3c7;padding:7px 10px;border-radius:6px;margin-top:8px">
+        ⚠️ 국민연금 190만원은 만 60세까지 계속 납부 시 기준입니다. 2031년 조기 은퇴 시 납부 중단으로 실제 수령액은 다소 줄어들 수 있습니다.
+      </div>
+    </div>
+
     <div class="ta-savings-row">
-      <label style="font-size:12px;color:var(--text-muted)">누적저축 초기값 수동 조정 (원):</label>
+      <label style="font-size:12px;color:var(--text-muted)">현금성 초기값 수동 조정 (원):</label>
       <input type="number" id="taSavingsBase" placeholder="0" step="1000000"
              style="width:160px;padding:5px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:inherit"
              onchange="setAccSavingsBase(parseInt(this.value)||0)">
@@ -2235,6 +2280,9 @@ function renderTotalAssetBar() {
   // 초기값 input 복원
   const baseInp = document.getElementById('taSavingsBase');
   if (baseInp && baseInp.value === '') baseInp.value = d2.base || '';
+
+  // 공적자산 패널 렌더
+  renderPublicAssets();
 }
 
 function toggleAssetBar() {
@@ -2244,6 +2292,74 @@ function toggleAssetBar() {
   const isOpen = detail.style.display !== 'none';
   detail.style.display = isOpen ? 'none' : 'block';
   if (chevron) chevron.classList.toggle('open', !isOpen);
+}
+
+// ── 공적자산 (국민연금 + 퇴직금) ────────────────────────────────────────────
+const PUBLIC_ASSETS_KEY = 'public_assets_v1';
+
+function loadPublicAssets() {
+  try {
+    const s = localStorage.getItem(PUBLIC_ASSETS_KEY);
+    return s ? JSON.parse(s) : { pensionMonthly: 1901000, pensionYear: 2042, retirePay: 0 };
+  } catch { return { pensionMonthly: 1901000, pensionYear: 2042, retirePay: 0 }; }
+}
+
+function savePublicAssets() {
+  const pa = {
+    pensionMonthly: parseInt(document.getElementById('taPensionMonthly')?.value || '0') || 1901000,
+    pensionYear:    parseInt(document.getElementById('taPensionYear')?.value    || '0') || 2042,
+    retirePay:      parseInt(document.getElementById('taRetirePay')?.value      || '0') || 0,
+  };
+  localStorage.setItem(PUBLIC_ASSETS_KEY, JSON.stringify(pa));
+  renderPublicAssets(pa);
+}
+
+function renderPublicAssets(pa) {
+  if (!pa) pa = loadPublicAssets();
+
+  // 입력란 복원
+  const pmEl = document.getElementById('taPensionMonthly');
+  const pyEl = document.getElementById('taPensionYear');
+  const rpEl = document.getElementById('taRetirePay');
+  if (pmEl && !pmEl.value) pmEl.value = pa.pensionMonthly || '';
+  if (pyEl && !pyEl.value) pyEl.value = pa.pensionYear    || '';
+  if (rpEl && !rpEl.value) rpEl.value = pa.retirePay      || '';
+
+  // 국민연금 표시
+  const pDisp = document.getElementById('taPensionDisp');
+  const pSub  = document.getElementById('taPensionSub');
+  if (pDisp) pDisp.textContent = `월 ${fmtAmount(pa.pensionMonthly)}`;
+  if (pSub) {
+    const curYear = new Date().getFullYear();
+    const yearsLeft = pa.pensionYear - curYear;
+    // 20년 수령 기준 단순 총액 참고값
+    const totalRef = pa.pensionMonthly * 12 * 20;
+    pSub.textContent = `${pa.pensionYear}년부터 · 지금부터 ${yearsLeft}년 후 · 20년 수령 시 참고 총액 ${fmtAmount(totalRef)}`;
+  }
+
+  // 퇴직금 표시
+  const rDisp = document.getElementById('taRetireDisp');
+  if (rDisp) rDisp.textContent = pa.retirePay ? fmtAmount(pa.retirePay) : '직접 입력 필요';
+
+  // 은퇴 준비 요약
+  const sumEl = document.getElementById('taRetireSummary');
+  if (sumEl) {
+    const retireYear  = 2031;
+    const curYear     = new Date().getFullYear();
+    const gapYears    = pa.pensionYear - retireYear;           // 공백기
+    const toRetire    = retireYear - curYear;                  // 은퇴까지 남은 연수
+    const { total }   = calculateTotalAssets();
+    const monthlyNeed = 3000000;                               // 월 생활비 기본값 (추후 입력 가능)
+    const gapNeed     = monthlyNeed * 12 * gapYears;           // 공백기 필요 총액
+    const gapSurplus  = total + (pa.retirePay || 0) - gapNeed;
+    const ok          = gapSurplus >= 0;
+
+    sumEl.innerHTML =
+      `🎯 은퇴 목표: <b>${retireYear}년</b> (${toRetire}년 후)<br>` +
+      `⏳ 연금 공백기: <b>${gapYears}년</b> (${retireYear}~${pa.pensionYear})<br>` +
+      `💸 공백기 예상 필요액: <b>${fmtAmount(gapNeed)}</b> <span style="font-size:10px;color:var(--text-muted)">(월 ${fmtAmount(monthlyNeed)} 기준)</span><br>` +
+      `<span style="color:${ok?'#059669':'#dc2626'};font-weight:700">${ok ? '✅ 현재 자산으로 공백기 커버 가능' : '⚠️ 공백기 부족 — 추가 자산 필요'}</span>`;
+  }
 }
 
 // ══════════════════════════════════════════════════════════════════════
