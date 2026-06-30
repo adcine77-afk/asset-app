@@ -429,6 +429,32 @@
   .tax-tip-body { font-size:13px; color:var(--text); line-height:1.8; }
   .tax-tip-body b { color:var(--income); }
 
+  /* ── 통합 자산 요약 바 ── */
+  .total-asset-bar { position:sticky; top:0; z-index:50; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.09); margin:0 -16px 16px; border-radius:0 0 10px 10px; overflow:hidden; }
+  .ta-collapsed { display:flex; align-items:center; justify-content:space-between; padding:10px 18px; cursor:pointer; user-select:none; gap:8px; }
+  .ta-collapsed:hover { background:#f8fafc; }
+  .ta-left { display:flex; align-items:center; gap:10px; flex-wrap:wrap; min-width:0; }
+  .ta-icon { font-size:16px; flex-shrink:0; }
+  #taSummaryText { font-size:14px; font-weight:700; color:var(--primary); white-space:nowrap; }
+  .ta-breakdown-pills { display:flex; gap:5px; flex-wrap:wrap; }
+  .ta-pill { font-size:11px; padding:2px 8px; border-radius:10px; font-weight:600; }
+  .ta-pill.re   { background:#fef2f2; color:var(--re); }
+  .ta-pill.pf   { background:#f0fdf4; color:#059669; }
+  .ta-pill.cash { background:#eff6ff; color:var(--primary); }
+  .ta-chevron { font-size:11px; color:var(--text-muted); transition:transform .2s; flex-shrink:0; }
+  .ta-chevron.open { transform:rotate(180deg); }
+  .ta-detail { padding:0 18px 14px; border-top:1px solid var(--border); }
+  .ta-detail-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:12px; }
+  .ta-detail-item { padding:12px; border-radius:8px; }
+  .ta-detail-item.re-item   { background:#fef2f2; }
+  .ta-detail-item.pf-item   { background:#f0fdf4; }
+  .ta-detail-item.cash-item { background:#eff6ff; }
+  .ta-di-label { font-size:11px; color:var(--text-muted); margin-bottom:4px; }
+  .ta-di-value { font-size:15px; font-weight:700; }
+  .ta-di-sub   { font-size:11px; color:var(--text-muted); margin-top:2px; }
+  .ta-savings-row { display:flex; align-items:center; gap:10px; margin-top:12px; flex-wrap:wrap; }
+  @media(max-width:600px) { .ta-detail-grid { grid-template-columns:1fr; } #taSummaryText { font-size:13px; } }
+
   /* 반응형 */
   @media (max-width: 600px) {
     .summary-grid { grid-template-columns: 1fr; gap: 8px; }
@@ -452,6 +478,46 @@
 </header>
 
 <main>
+
+<!-- ══════════════════════════════════════════════════════════
+     통합 자산 요약 바 (모든 탭 공통 표시)
+══════════════════════════════════════════════════════════ -->
+<div id="totalAssetBar" class="total-asset-bar">
+  <div class="ta-collapsed" onclick="toggleAssetBar()">
+    <div class="ta-left">
+      <span class="ta-icon">💰</span>
+      <span id="taSummaryText">전체 순자산: 계산 중...</span>
+      <div class="ta-breakdown-pills" id="taBreakdownPills"></div>
+    </div>
+    <span class="ta-chevron" id="taChevron">▼</span>
+  </div>
+  <div id="taDetail" class="ta-detail" style="display:none">
+    <div class="ta-detail-grid">
+      <div class="ta-detail-item re-item">
+        <div class="ta-di-label">🏠 부동산 순자산</div>
+        <div class="ta-di-value" id="taReVal">—</div>
+        <div class="ta-di-sub" id="taReSub">—</div>
+      </div>
+      <div class="ta-detail-item pf-item">
+        <div class="ta-di-label">📈 금융자산 (포트폴리오)</div>
+        <div class="ta-di-value" id="taPfVal">—</div>
+        <div class="ta-di-sub" id="taPfSub">—</div>
+      </div>
+      <div class="ta-detail-item cash-item">
+        <div class="ta-di-label">💵 현금성 (누적저축)</div>
+        <div class="ta-di-value" id="taCashVal">—</div>
+        <div class="ta-di-sub" id="taCashSub">—</div>
+      </div>
+    </div>
+    <div class="ta-savings-row">
+      <label style="font-size:12px;color:var(--text-muted)">누적저축 초기값 수동 조정 (원):</label>
+      <input type="number" id="taSavingsBase" placeholder="0" step="1000000"
+             style="width:160px;padding:5px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:inherit"
+             onchange="setAccSavingsBase(parseInt(this.value)||0)">
+      <span style="font-size:11px;color:var(--text-muted)">← 기존 통장 잔액·예금 등 초기 보유 현금</span>
+    </div>
+  </div>
+</div>
 
 <!-- ══════════════════════════════════════════════════════════
      가계부 탭
@@ -849,6 +915,7 @@ function switchTab(tab) {
   document.getElementById('headerSub').textContent = labels[tab] || '';
   if (tab === 're') renderRE();
   if (tab === 'pf') renderPF();
+  renderTotalAssetBar();
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -2014,6 +2081,172 @@ function pfRerenderCard(accId, hId) {
 }
 
 // ══════════════════════════════════════════════════════════════════════
+//  통합 자산 모듈 (unified-assets)
+//
+//  데이터 흐름:
+//  ┌──────────────────────────────────────────────────────────────────┐
+//  │ [가계부] asset_mgmt_v1 + asset_mgmt_recurring_v1                 │
+//  │   → 월별 (수입 - 지출) = 월 저축액                                │
+//  │   → 지난달까지 자동 누적 → localStorage: accumulated_savings_v1   │
+//  │   → 마지막 정산월 기록 → localStorage: last_settled_month         │
+//  ├──────────────────────────────────────────────────────────────────┤
+//  │ [부동산] real_estate_v1 + re_loans_v1                             │
+//  │   → 시세합계 + 전세지급 - 전세수취 - 대출잔액 = 부동산 순자산      │
+//  ├──────────────────────────────────────────────────────────────────┤
+//  │ [포트폴리오] portfolio_accounts                                    │
+//  │   → 현재가 × 수량 합계 = 금융자산 평가액                           │
+//  ├──────────────────────────────────────────────────────────────────┤
+//  │ 통합 순자산 = 현금성(누적저축) + 부동산 순자산 + 금융자산 평가액    │
+//  └──────────────────────────────────────────────────────────────────┘
+// ══════════════════════════════════════════════════════════════════════
+
+const ACC_SAVINGS_KEY   = 'accumulated_savings_v1'; // 자동 누적된 저축액 (원)
+const SETTLED_MONTH_KEY = 'last_settled_month';      // 마지막 정산 완료 월 (YYYY-MM)
+const SAVINGS_BASE_KEY  = 'savings_base_v1';         // 수동 입력 초기값 (원)
+
+function loadAccSavings() {
+  return {
+    base:   parseInt(localStorage.getItem(SAVINGS_BASE_KEY)  || '0'),
+    settled:parseInt(localStorage.getItem(ACC_SAVINGS_KEY)   || '0'),
+    lastYM: localStorage.getItem(SETTLED_MONTH_KEY) || ''
+  };
+}
+
+function setAccSavingsBase(val) {
+  localStorage.setItem(SAVINGS_BASE_KEY, String(val));
+  renderTotalAssetBar();
+}
+
+// 특정 월(YYYY-MM)의 가계부 순 저축액 계산
+function getLedgerMonthlySavings(ym) {
+  const txs = (state?.transactions || []);
+  let income = 0, expense = 0;
+  txs.forEach(tx => {
+    if (!tx.date || !tx.date.startsWith(ym)) return;
+    if (tx.type === 'income')  income  += (tx.amount || 0);
+    if (tx.type === 'expense') expense += (tx.amount || 0);
+  });
+  return income - expense;
+}
+
+// 앱 시작 시: 지난달까지 미정산 월을 누적 저축에 합산 (중복 방지 포함)
+function settleAccumulatedSavings() {
+  const d = loadAccSavings();
+  const now  = new Date();
+  const curYM = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`;
+
+  if (!d.lastYM) {
+    // 최초 실행: 기준월만 저장, 과거 소급 안 함 (초기값으로 대신)
+    localStorage.setItem(SETTLED_MONTH_KEY, curYM);
+    return;
+  }
+  if (d.lastYM >= curYM) return; // 이미 최신 — 중복 실행 방지
+
+  let [y, m] = d.lastYM.split('-').map(Number);
+  let newSettled = d.settled;
+  while (true) {
+    m += 1;
+    if (m > 12) { m = 1; y += 1; }
+    const ym = `${y}-${pad(m)}`;
+    if (ym >= curYM) break; // 현재 진행 중인 달은 제외
+    newSettled += getLedgerMonthlySavings(ym);
+  }
+  localStorage.setItem(ACC_SAVINGS_KEY,   String(newSettled));
+  localStorage.setItem(SETTLED_MONTH_KEY, curYM);
+}
+
+// 부동산 순자산 (원)
+function getRENetAssets() {
+  if (!reState || !reLoans) return 0;
+  const totalAsset = RE_ASSET_DEFS.reduce((s, d) => s + (reState.assets[d.id]?.value || 0), 0);
+  const jReceived  = JEONSE_DEFS.reduce((s, d) => s + (reState.jeonse?.received[d.id] || 0), 0);
+  const loanTotal  = reLoans.reduce((s, l) => s + (l.principal || 0), 0);
+  const jeonsePaid = reState.jeonse?.paid?.amount || 0;
+  return totalAsset + jeonsePaid - jReceived - loanTotal;
+}
+
+// 포트폴리오 총 평가액 (원)
+function getPFTotal() {
+  if (!pfAccounts) return 0;
+  return pfAccounts.reduce((s, a) => s + pfAccountTotal(a), 0);
+}
+
+// 통합 순자산 계산 — 세 모듈을 합산
+function calculateTotalAssets() {
+  const d = loadAccSavings();
+  const now   = new Date();
+  const curYM = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`;
+  const curMonthNet = getLedgerMonthlySavings(curYM); // 이번달 현재까지
+  const cash  = d.base + d.settled + curMonthNet;
+  const re    = getRENetAssets();
+  const pf    = getPFTotal();
+  return { cash, re, pf, total: cash + re + pf };
+}
+
+// 통합 자산 바 렌더링
+function renderTotalAssetBar() {
+  const { cash, re, pf, total } = calculateTotalAssets();
+
+  const summaryEl = document.getElementById('taSummaryText');
+  if (summaryEl) summaryEl.textContent = `전체 순자산: ${fmtAmount(total)}`;
+
+  const reP   = total > 0 ? Math.round(re   / total * 100) : 0;
+  const pfP   = total > 0 ? Math.round(pf   / total * 100) : 0;
+  const cashP = total > 0 ? Math.round(cash / total * 100) : 0;
+  const pillsEl = document.getElementById('taBreakdownPills');
+  if (pillsEl) pillsEl.innerHTML =
+    `<span class="ta-pill re">부동산 ${reP}%</span>` +
+    `<span class="ta-pill pf">금융자산 ${pfP}%</span>` +
+    `<span class="ta-pill cash">현금 ${cashP}%</span>`;
+
+  // 상세 패널 — 부동산
+  const reValEl = document.getElementById('taReVal');
+  if (reValEl) reValEl.textContent = fmtAmount(re);
+  const reSubEl = document.getElementById('taReSub');
+  if (reSubEl && reState && reLoans) {
+    const totalAsset = RE_ASSET_DEFS.reduce((s,d)=>s+(reState.assets[d.id]?.value||0),0);
+    const debts = JEONSE_DEFS.reduce((s,d)=>s+(reState.jeonse?.received[d.id]||0),0)
+                  + reLoans.reduce((s,l)=>s+(l.principal||0),0)
+                  - (reState.jeonse?.paid?.amount||0);
+    reSubEl.textContent = `시세 ${fmtAmount(totalAsset)} - 부채 ${fmtAmount(debts)}`;
+  }
+
+  // 상세 패널 — 포트폴리오
+  const pfValEl = document.getElementById('taPfVal');
+  if (pfValEl) pfValEl.textContent = fmtAmount(pf);
+  const pfSubEl = document.getElementById('taPfSub');
+  if (pfSubEl && pfAccounts) {
+    const totalCost = pfAccounts.reduce((s,a)=>s+pfAccountCost(a),0);
+    const pnl = pf - totalCost;
+    pfSubEl.textContent = `원가 ${fmtAmount(totalCost)} · 손익 ${pnl>=0?'+':''}${fmtAmount(pnl)}`;
+  }
+
+  // 상세 패널 — 현금
+  const d2 = loadAccSavings();
+  const now2  = new Date();
+  const curYM2 = `${now2.getFullYear()}-${pad(now2.getMonth()+1)}`;
+  const curNet = getLedgerMonthlySavings(curYM2);
+  const cashValEl = document.getElementById('taCashVal');
+  if (cashValEl) cashValEl.textContent = fmtAmount(cash);
+  const cashSubEl = document.getElementById('taCashSub');
+  if (cashSubEl) cashSubEl.textContent =
+    `초기값 ${fmtAmount(d2.base)} + 누적정산 ${fmtAmount(d2.settled)} + 이번달 ${fmtAmount(curNet)}`;
+
+  // 초기값 input 복원
+  const baseInp = document.getElementById('taSavingsBase');
+  if (baseInp && baseInp.value === '') baseInp.value = d2.base || '';
+}
+
+function toggleAssetBar() {
+  const detail  = document.getElementById('taDetail');
+  const chevron = document.getElementById('taChevron');
+  if (!detail) return;
+  const isOpen = detail.style.display !== 'none';
+  detail.style.display = isOpen ? 'none' : 'block';
+  if (chevron) chevron.classList.toggle('open', !isOpen);
+}
+
+// ══════════════════════════════════════════════════════════════════════
 //  초기화
 // ══════════════════════════════════════════════════════════════════════
 function initDaySelect() {
@@ -2029,6 +2262,8 @@ function init() {
   loadPF();
 
   generateRecurringTransactions();
+  settleAccumulatedSavings();
+  renderTotalAssetBar();
 
   document.getElementById('txDate').value     = todayStr();
   document.getElementById('recStartYM').value = todayStr().slice(0,7);
