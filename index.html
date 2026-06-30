@@ -58,15 +58,16 @@
 
   .tab-nav {
     max-width: 960px; margin: 0 auto;
-    display: flex; padding: 0 16px;
+    display: flex; padding: 0 4px;
     border-top: 1px solid var(--border);
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
   }
   .tab-btn {
-    padding: 10px 20px;
+    padding: 10px 14px;
     border: none; border-bottom: 3px solid transparent;
     background: none; cursor: pointer;
     font-size: 13px; font-weight: 600; color: var(--text-sub);
-    transition: all .15s;
+    transition: all .15s; white-space: nowrap;
   }
   .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
   .tab-btn.re-tab.active { color: var(--re); border-bottom-color: var(--re); }
@@ -478,7 +479,9 @@
   <div class="tab-nav">
     <button class="tab-btn active" id="tabBtnLedger" onclick="switchTab('ledger')">📒 가계부</button>
     <button class="tab-btn re-tab" id="tabBtnRE" onclick="switchTab('re')">🏠 부동산</button>
-    <button class="tab-btn" id="tabBtnPF" onclick="switchTab('pf')">📈 포트폴리오</button>
+    <button class="tab-btn" id="tabBtnPF" onclick="switchTab('pf')">📈 주식</button>
+    <button class="tab-btn" id="tabBtnSavings" onclick="switchTab('savings')">🏦 예적금</button>
+    <button class="tab-btn" id="tabBtnPublic" onclick="switchTab('public')">🏛️ 공적자산</button>
   </div>
 </header>
 
@@ -502,69 +505,39 @@
         <div class="ta-di-sub" id="taReSub">—</div>
       </div>
       <div class="ta-detail-item pf-item">
-        <div class="ta-di-label">📈 금융자산 (포트폴리오)</div>
+        <div class="ta-di-label">📈 주식 포트폴리오</div>
         <div class="ta-di-value" id="taPfVal">—</div>
         <div class="ta-di-sub" id="taPfSub">—</div>
       </div>
+      <div class="ta-detail-item" style="background:#f0fdf4;border-left:3px solid #059669">
+        <div class="ta-di-label">🏦 예적금</div>
+        <div class="ta-di-value" id="taSvVal" style="color:#059669">—</div>
+        <div class="ta-di-sub" id="taSvSub">—</div>
+      </div>
       <div class="ta-detail-item cash-item">
-        <div class="ta-di-label">💵 현금성 (누적저축)</div>
+        <div class="ta-di-label">💵 현금성 자산 <span style="font-size:10px;font-weight:400">(누적저축)</span></div>
         <div class="ta-di-value" id="taCashVal">—</div>
         <div class="ta-di-sub" id="taCashSub">—</div>
       </div>
     </div>
-    <!-- 공적자산 (순자산 합계에 포함 안 됨 — 미래 소득 흐름) -->
+    <!-- 공적자산 요약 (순자산 합계에 포함 안 됨) -->
     <div class="ta-public-section">
-      <div class="ta-public-title">🏛️ 공적자산 <span style="font-size:11px;font-weight:400;color:var(--text-muted)">— 순자산 합계에는 미포함 (미래 소득 흐름)</span></div>
+      <div class="ta-public-title">🏛️ 공적자산 <span style="font-size:11px;font-weight:400;color:var(--text-muted)">— 순자산 합계 미포함 · 상세 입력은 <a href="#" onclick="switchTab('public');return false;" style="color:var(--primary)">공적자산 탭</a>에서</span></div>
       <div class="ta-public-grid">
         <div class="ta-public-item">
           <div class="ta-di-label">국민연금 예상 월 수령액</div>
-          <div class="ta-di-value" id="taPensionDisp" style="color:#7c3aed">—</div>
-          <div class="ta-di-sub" id="taPensionSub">—</div>
-          <div style="margin-top:8px;display:grid;gap:5px">
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-              <span style="font-size:11px;color:var(--text-muted);width:100px">연금 수령 연도</span>
-              <input type="number" id="taPensionYear" placeholder="2042" step="1" min="2030" max="2060"
-                     style="flex:1;min-width:70px;padding:4px 7px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:inherit"
-                     oninput="calcPension()">
-              <span style="font-size:11px;color:var(--text-muted)">년부터</span>
-            </div>
-          </div>
+          <div class="ta-di-value" id="taBarPensionDisp" style="color:#7c3aed">—</div>
+          <div class="ta-di-sub" id="taBarPensionSub" style="font-size:11px;color:var(--text-muted)">—</div>
         </div>
         <div class="ta-public-item">
           <div class="ta-di-label">퇴직금 예상액 (IRP 이전)</div>
-          <div class="ta-di-value" id="taRetireDisp" style="color:#0369a1">—</div>
-          <div class="ta-di-sub" id="taRetireSub">입사일·급여 입력 시 자동 계산</div>
-          <div style="margin-top:8px;display:grid;gap:5px">
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-              <span style="font-size:11px;color:var(--text-muted);width:90px">월 평균임금</span>
-              <input type="number" id="taMonthSalary" placeholder="급여(세전,원)" step="100000"
-                     style="flex:1;min-width:120px;padding:4px 7px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:inherit"
-                     oninput="calcRetirePay()">
-            </div>
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-              <span style="font-size:11px;color:var(--text-muted);width:90px">입사일</span>
-              <input type="date" id="taJoinDate" value="2022-09-01"
-                     style="flex:1;padding:4px 7px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:inherit"
-                     oninput="calcRetirePay()">
-            </div>
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-              <span style="font-size:11px;color:var(--text-muted);width:90px">은퇴 예정일</span>
-              <input type="date" id="taRetireDate" value="2031-09-01"
-                     style="flex:1;padding:4px 7px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:inherit"
-                     oninput="calcRetirePay()">
-            </div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">
-              ※ 세전 기준. 퇴직소득세 별도. 상여 포함 월 평균으로 입력하세요.
-            </div>
-          </div>
+          <div class="ta-di-value" id="taBarRetireDisp" style="color:#0369a1">—</div>
+          <div class="ta-di-sub" id="taBarRetireSub" style="font-size:11px;color:var(--text-muted)">—</div>
         </div>
         <div class="ta-public-item" style="background:#f0fdf4">
           <div class="ta-di-label">⏳ 은퇴 준비 요약</div>
-          <div id="taRetireSummary" style="font-size:12px;line-height:1.8;margin-top:4px;color:var(--text)"></div>
+          <div id="taBarRetireSummary" style="font-size:11px;line-height:1.8;margin-top:4px;color:var(--text)"></div>
         </div>
-      </div>
-      <div style="font-size:11px;color:#92400e;background:#fef3c7;padding:7px 10px;border-radius:6px;margin-top:8px">
-        ⚠️ 국민연금 190만원은 만 60세까지 계속 납부 시 기준입니다. 2031년 조기 은퇴 시 납부 중단으로 실제 수령액은 다소 줄어들 수 있습니다.
       </div>
     </div>
 
@@ -573,7 +546,7 @@
       <input type="number" id="taSavingsBase" placeholder="0" step="1000000"
              style="width:160px;padding:5px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:inherit"
              onchange="setAccSavingsBase(parseInt(this.value)||0)">
-      <span style="font-size:11px;color:var(--text-muted)">← 기존 통장 잔액·예금 등 초기 보유 현금</span>
+      <span style="font-size:11px;color:var(--text-muted)">← 가계부 외 초기 보유 현금</span>
     </div>
   </div>
 </div>
@@ -909,6 +882,106 @@
 
 </div><!-- /tabPortfolio -->
 
+<!-- ══════════════════════════════════════════════════════════
+     예적금 탭
+══════════════════════════════════════════════════════════ -->
+<div id="tabSavings" style="display:none">
+  <div class="card">
+    <div class="card-title"><div class="icon" style="background:#f0fdf4">🏦</div>예적금 계좌 관리</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">
+      정기예금, 적금, CMA, MMF 등 주식 외 금융상품을 등록하세요. 총액이 통합 자산에 반영됩니다.
+    </div>
+    <!-- 입력 폼 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-bottom:12px" id="svFormWrap">
+      <div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">계좌명 / 상품명</div>
+        <input type="text" id="svName" placeholder="예: KB 정기예금" maxlength="30"
+               style="width:100%;box-sizing:border-box;padding:7px 9px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:3px">잔액 (원)</div>
+        <input type="number" id="svAmount" placeholder="0" step="100000" min="0"
+               style="width:100%;box-sizing:border-box;padding:7px 9px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
+      </div>
+      <button class="primary" onclick="addSavingsAccount()" style="height:36px;white-space:nowrap">+ 추가</button>
+    </div>
+    <!-- 목록 -->
+    <div id="svList"></div>
+    <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:13px;font-weight:600;color:var(--text)">합계</span>
+      <span style="font-size:16px;font-weight:700;color:#059669" id="svTotal">—</span>
+    </div>
+  </div>
+  <div class="notice">ℹ️ 가계부의 누적저축(현금성 자산)과 별도로 관리됩니다. 중복 입력에 주의하세요.</div>
+</div><!-- /tabSavings -->
+
+<!-- ══════════════════════════════════════════════════════════
+     공적자산 탭
+══════════════════════════════════════════════════════════ -->
+<div id="tabPublic" style="display:none">
+  <div class="card">
+    <div class="card-title"><div class="icon" style="background:#f5f3ff">🏛️</div>국민연금 예상 수령액</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">
+      기준값 고정 (내연금.kr 조회 결과): 기준 수령액 190만1천원 · 현재 납부 291개월 · 만 60세까지 425개월<br>
+      연금 수령 연도를 변경하면 실제 납부 기간에 비례해 수령액이 자동 계산됩니다.
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+      <span style="font-size:13px;color:var(--text-muted);min-width:110px">연금 수령 시작 연도</span>
+      <input type="number" id="taPensionYear" placeholder="2042" step="1" min="2030" max="2060"
+             style="width:90px;padding:7px 9px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit"
+             oninput="calcPension()">
+      <span style="font-size:13px;color:var(--text-muted)">년부터 수령</span>
+    </div>
+    <div style="background:#f5f3ff;border-radius:8px;padding:14px 16px">
+      <div style="font-size:12px;color:#6b21a8;margin-bottom:2px">예상 월 수령액</div>
+      <div style="font-size:22px;font-weight:700;color:#7c3aed" id="taPensionDisp">—</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:4px;line-height:1.7" id="taPensionSub">—</div>
+    </div>
+    <div style="font-size:11px;color:#92400e;background:#fef3c7;padding:8px 10px;border-radius:6px;margin-top:10px">
+      ⚠️ 190만원은 만 60세까지 납부 완료 시 기준입니다. 조기 은퇴 후 납부 중단 시 실제 수령액은 줄어듭니다.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><div class="icon" style="background:#eff6ff">💼</div>퇴직금 예상액</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">
+      근로기준법 공식: 1일 평균임금 × 30일 × (재직일수 ÷ 365). IRP 이전 예정.
+    </div>
+    <div style="display:grid;gap:10px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="font-size:13px;color:var(--text-muted);min-width:90px">월 평균임금</span>
+        <input type="number" id="taMonthSalary" placeholder="급여(세전, 원)" step="100000"
+               style="flex:1;min-width:150px;padding:7px 9px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit"
+               oninput="calcRetirePay()">
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="font-size:13px;color:var(--text-muted);min-width:90px">입사일</span>
+        <input type="date" id="taJoinDate" value="2022-09-01"
+               style="flex:1;padding:7px 9px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit"
+               oninput="calcRetirePay()">
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="font-size:13px;color:var(--text-muted);min-width:90px">은퇴 예정일</span>
+        <input type="date" id="taRetireDate" value="2031-09-01"
+               style="flex:1;padding:7px 9px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit"
+               oninput="calcRetirePay()">
+      </div>
+      <div style="font-size:11px;color:var(--text-muted)">※ 세전 기준. 퇴직소득세 별도. 상여 포함 월 평균으로 입력하세요.</div>
+    </div>
+    <div style="background:#eff6ff;border-radius:8px;padding:14px 16px">
+      <div style="font-size:12px;color:#1e40af;margin-bottom:2px">예상 퇴직금 (IRP 이전)</div>
+      <div style="font-size:22px;font-weight:700;color:#0369a1" id="taRetireDisp">—</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:4px" id="taRetireSub">월 평균임금을 입력하면 자동 계산</div>
+    </div>
+  </div>
+
+  <div class="card" style="background:#f0fdf4">
+    <div class="card-title"><div class="icon" style="background:#dcfce7">⏳</div>은퇴 준비 요약</div>
+    <div id="taRetireSummary" style="font-size:13px;line-height:1.9;color:var(--text)"></div>
+  </div>
+  <div class="notice">ℹ️ 공적자산(연금·퇴직금)은 미래 소득 흐름으로, 순자산 합계에는 포함되지 않습니다.</div>
+</div><!-- /tabPublic -->
+
 </main>
 
 <!-- 반복 거래 수정 모달 -->
@@ -966,16 +1039,22 @@ function toggleCollapse(bodyId, headerId) {
 let currentTab = 'ledger';
 function switchTab(tab) {
   currentTab = tab;
-  document.getElementById('tabLedger').style.display    = tab === 'ledger' ? 'contents' : 'none';
-  document.getElementById('tabRE').style.display        = tab === 're'     ? 'contents' : 'none';
-  document.getElementById('tabPortfolio').style.display = tab === 'pf'     ? 'contents' : 'none';
-  document.getElementById('tabBtnLedger').classList.toggle('active', tab === 'ledger');
-  document.getElementById('tabBtnRE').classList.toggle('active',     tab === 're');
-  document.getElementById('tabBtnPF').classList.toggle('active',     tab === 'pf');
-  const labels = { ledger:'가계부', re:'부동산', pf:'포트폴리오' };
+  document.getElementById('tabLedger').style.display    = tab === 'ledger'  ? 'contents' : 'none';
+  document.getElementById('tabRE').style.display        = tab === 're'      ? 'contents' : 'none';
+  document.getElementById('tabPortfolio').style.display = tab === 'pf'      ? 'contents' : 'none';
+  document.getElementById('tabSavings').style.display   = tab === 'savings' ? 'contents' : 'none';
+  document.getElementById('tabPublic').style.display    = tab === 'public'  ? 'contents' : 'none';
+  document.getElementById('tabBtnLedger').classList.toggle('active',  tab === 'ledger');
+  document.getElementById('tabBtnRE').classList.toggle('active',      tab === 're');
+  document.getElementById('tabBtnPF').classList.toggle('active',      tab === 'pf');
+  document.getElementById('tabBtnSavings').classList.toggle('active', tab === 'savings');
+  document.getElementById('tabBtnPublic').classList.toggle('active',  tab === 'public');
+  const labels = { ledger:'가계부', re:'부동산', pf:'주식', savings:'예적금', public:'공적자산' };
   document.getElementById('headerSub').textContent = labels[tab] || '';
   if (tab === 're') renderRE();
   if (tab === 'pf') renderPF();
+  if (tab === 'savings') renderSavingsTab();
+  if (tab === 'public') renderPublicTab();
   renderTotalAssetBar();
 }
 
@@ -2232,35 +2311,38 @@ function getPFTotal() {
   return pfAccounts.reduce((s, a) => s + pfAccountTotal(a), 0);
 }
 
-// 통합 순자산 계산 — 세 모듈을 합산
+// 통합 순자산 계산
 function calculateTotalAssets() {
   const d = loadAccSavings();
   const now   = new Date();
   const curYM = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`;
-  const curMonthNet = getLedgerMonthlySavings(curYM); // 이번달 현재까지
+  const curMonthNet = getLedgerMonthlySavings(curYM);
   const cash  = d.base + d.settled + curMonthNet;
   const re    = getRENetAssets();
   const pf    = getPFTotal();
-  return { cash, re, pf, total: cash + re + pf };
+  const sv    = getSavingsTotal();
+  return { cash, re, pf, sv, total: cash + re + pf + sv };
 }
 
 // 통합 자산 바 렌더링
 function renderTotalAssetBar() {
-  const { cash, re, pf, total } = calculateTotalAssets();
+  const { cash, re, pf, sv, total } = calculateTotalAssets();
 
   const summaryEl = document.getElementById('taSummaryText');
   if (summaryEl) summaryEl.textContent = `전체 순자산: ${fmtAmount(total)}`;
 
   const reP   = total > 0 ? Math.round(re   / total * 100) : 0;
   const pfP   = total > 0 ? Math.round(pf   / total * 100) : 0;
+  const svP   = total > 0 ? Math.round(sv   / total * 100) : 0;
   const cashP = total > 0 ? Math.round(cash / total * 100) : 0;
   const pillsEl = document.getElementById('taBreakdownPills');
   if (pillsEl) pillsEl.innerHTML =
     `<span class="ta-pill re">부동산 ${reP}%</span>` +
-    `<span class="ta-pill pf">금융자산 ${pfP}%</span>` +
+    `<span class="ta-pill pf">주식 ${pfP}%</span>` +
+    `<span class="ta-pill" style="background:#d1fae5;color:#065f46">예적금 ${svP}%</span>` +
     `<span class="ta-pill cash">현금 ${cashP}%</span>`;
 
-  // 상세 패널 — 부동산
+  // 부동산
   const reValEl = document.getElementById('taReVal');
   if (reValEl) reValEl.textContent = fmtAmount(re);
   const reSubEl = document.getElementById('taReSub');
@@ -2272,7 +2354,7 @@ function renderTotalAssetBar() {
     reSubEl.textContent = `시세 ${fmtAmount(totalAsset)} - 부채 ${fmtAmount(debts)}`;
   }
 
-  // 상세 패널 — 포트폴리오
+  // 주식 포트폴리오
   const pfValEl = document.getElementById('taPfVal');
   if (pfValEl) pfValEl.textContent = fmtAmount(pf);
   const pfSubEl = document.getElementById('taPfSub');
@@ -2282,7 +2364,16 @@ function renderTotalAssetBar() {
     pfSubEl.textContent = `원가 ${fmtAmount(totalCost)} · 손익 ${pnl>=0?'+':''}${fmtAmount(pnl)}`;
   }
 
-  // 상세 패널 — 현금
+  // 예적금
+  const svValEl = document.getElementById('taSvVal');
+  if (svValEl) svValEl.textContent = fmtAmount(sv);
+  const svSubEl = document.getElementById('taSvSub');
+  if (svSubEl) {
+    const arr = loadSavingsAccounts();
+    svSubEl.textContent = arr.length > 0 ? `${arr.length}개 계좌` : '예적금 탭에서 등록';
+  }
+
+  // 현금성 자산
   const d2 = loadAccSavings();
   const now2  = new Date();
   const curYM2 = `${now2.getFullYear()}-${pad(now2.getMonth()+1)}`;
@@ -2297,8 +2388,8 @@ function renderTotalAssetBar() {
   const baseInp = document.getElementById('taSavingsBase');
   if (baseInp && baseInp.value === '') baseInp.value = d2.base || '';
 
-  // 공적자산 패널 렌더
-  renderPublicAssets();
+  // 공적자산 요약 (바 전용 — 탭 입력값 없이 localStorage에서 읽음)
+  renderBarPublicSummary();
 }
 
 function toggleAssetBar() {
@@ -2308,6 +2399,57 @@ function toggleAssetBar() {
   const isOpen = detail.style.display !== 'none';
   detail.style.display = isOpen ? 'none' : 'block';
   if (chevron) chevron.classList.toggle('open', !isOpen);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  예적금 탭
+// ══════════════════════════════════════════════════════════════════════
+const SAVINGS_KEY = 'savings_accounts_v1';
+
+function loadSavingsAccounts() {
+  try { const s = localStorage.getItem(SAVINGS_KEY); return s ? JSON.parse(s) : []; }
+  catch { return []; }
+}
+function saveSavingsAccounts(arr) {
+  localStorage.setItem(SAVINGS_KEY, JSON.stringify(arr));
+}
+function getSavingsTotal() {
+  return loadSavingsAccounts().reduce((s, a) => s + (a.amount || 0), 0);
+}
+function addSavingsAccount() {
+  const name   = document.getElementById('svName')?.value.trim();
+  const amount = parseFloat(document.getElementById('svAmount')?.value || '0');
+  if (!name || amount <= 0) { alert('계좌명과 금액을 입력하세요.'); return; }
+  const arr = loadSavingsAccounts();
+  arr.push({ id: Date.now(), name, amount });
+  saveSavingsAccounts(arr);
+  document.getElementById('svName').value   = '';
+  document.getElementById('svAmount').value = '';
+  renderSavingsTab();
+  renderTotalAssetBar();
+}
+function deleteSavingsAccount(id) {
+  saveSavingsAccounts(loadSavingsAccounts().filter(a => a.id !== id));
+  renderSavingsTab();
+  renderTotalAssetBar();
+}
+function renderSavingsTab() {
+  const arr    = loadSavingsAccounts();
+  const total  = arr.reduce((s, a) => s + (a.amount || 0), 0);
+  const listEl = document.getElementById('svList');
+  const totEl  = document.getElementById('svTotal');
+  if (totEl) totEl.textContent = fmtAmount(total);
+  if (!listEl) return;
+  if (arr.length === 0) {
+    listEl.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px 0;font-size:13px">등록된 예적금 계좌가 없습니다.</div>';
+    return;
+  }
+  listEl.innerHTML = arr.map(a => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:13px;flex:1">${escHtml(a.name)}</span>
+      <span style="font-size:14px;font-weight:600;color:#059669">${fmtAmount(a.amount)}</span>
+      <button onclick="deleteSavingsAccount(${a.id})" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:13px;padding:2px 6px">✕</button>
+    </div>`).join('');
 }
 
 // ── 공적자산 (국민연금 + 퇴직금) ────────────────────────────────────────────
@@ -2367,11 +2509,11 @@ function calcPension() {
   // localStorage 저장
   const pa = loadPublicAssets();
   pa.pensionYear      = pensionYear;
-  pa.pensionAdjusted  = adjusted;   // 조정된 실제 수령액
+  pa.pensionAdjusted  = adjusted;
   localStorage.setItem(PUBLIC_ASSETS_KEY, JSON.stringify(pa));
 
-  // 은퇴 준비 요약 갱신
   renderRetireSummary(pa);
+  renderBarPublicSummary();
 }
 
 // 퇴직금 자동 계산 (근로기준법 공식)
@@ -2412,8 +2554,8 @@ function calcRetirePay() {
   pa.retirePay   = retirePay;
   localStorage.setItem(PUBLIC_ASSETS_KEY, JSON.stringify(pa));
 
-  // 은퇴 준비 요약 갱신
   renderRetireSummary(pa);
+  renderBarPublicSummary();
 }
 
 function savePublicAssets() {
@@ -2457,32 +2599,23 @@ function renderPublicAssets(pa) {
   renderRetireSummary(pa);
 }
 
-function renderRetireSummary(pa) {
-  if (!pa) pa = loadPublicAssets();
-  const sumEl = document.getElementById('taRetireSummary');
-  if (!sumEl) return;
-
+function _buildRetireSummaryHTML(pa) {
   const retireDate  = new Date(pa.retireDate || '2031-09-01');
   const retireYear  = retireDate.getFullYear();
   const pensionYear = pa.pensionYear || 2042;
   const curYear     = new Date().getFullYear();
   const gapYears    = pensionYear - retireYear;
   const toRetire    = retireYear - curYear;
-
   const { total }      = calculateTotalAssets();
   const retirePay      = pa.retirePay || 0;
-  const pensionMonthly = pa.pensionAdjusted || pa.pensionMonthly || 1901000; // 조정된 연금액 우선
-  const monthlyNeed    = 3000000; // 월 생활비 기준 (4단계에서 사용자 입력으로 확장 예정)
+  const pensionMonthly = pa.pensionAdjusted || 1901000;
+  const monthlyNeed    = 3000000;
   const gapNeed        = monthlyNeed * 12 * gapYears;
   const totalAtRetire  = total + retirePay;
   const surplus        = totalAtRetire - gapNeed;
   const ok             = surplus >= 0;
-
-  // 연금 수령 후 월 여유 (연금 - 생활비)
   const monthlyMargin  = pensionMonthly - monthlyNeed;
-
-  sumEl.innerHTML =
-    `🎯 은퇴 목표: <b>${retireYear}년</b> (${toRetire > 0 ? toRetire + '년 후' : '올해'})<br>` +
+  return `🎯 은퇴 목표: <b>${retireYear}년</b> (${toRetire > 0 ? toRetire + '년 후' : '올해'})<br>` +
     `⏳ 연금 공백기: <b>${gapYears}년</b> (${retireYear}~${pensionYear}년)<br>` +
     `💸 공백기 필요액: <b>${fmtAmount(gapNeed)}</b><span style="font-size:10px;color:var(--text-muted)"> (월 ${fmtAmount(monthlyNeed)} × ${gapYears*12}개월)</span><br>` +
     `📦 은퇴 시 가용자산: <b>${fmtAmount(totalAtRetire)}</b><span style="font-size:10px;color:var(--text-muted)"> (순자산 + 퇴직금)</span><br>` +
@@ -2490,6 +2623,53 @@ function renderRetireSummary(pa) {
     `${ok ? `✅ 공백기 후 ${fmtAmount(surplus)} 여유` : `⚠️ ${fmtAmount(Math.abs(surplus))} 부족`}</span><br>` +
     `🏛️ ${pensionYear}년 연금 개시 후: 월 ${fmtAmount(pensionMonthly)} 수령 ` +
     `<span style="color:${monthlyMargin>=0?'#059669':'#dc2626'}">(생활비 대비 월 ${monthlyMargin>=0?'+':''}${fmtAmount(monthlyMargin)})</span>`;
+}
+function renderRetireSummary(pa) {
+  if (!pa) pa = loadPublicAssets();
+  const sumEl = document.getElementById('taRetireSummary');
+  if (sumEl) sumEl.innerHTML = _buildRetireSummaryHTML(pa);
+}
+
+// 통합바용 공적자산 요약 (입력 없이 localStorage만 읽음)
+function renderBarPublicSummary() {
+  const pa = loadPublicAssets();
+  const pensionAdj = pa.pensionAdjusted || 0;
+  const pensionYear = pa.pensionYear || 2042;
+
+  const pDisp = document.getElementById('taBarPensionDisp');
+  const pSub  = document.getElementById('taBarPensionSub');
+  if (pDisp) pDisp.textContent = pensionAdj ? `월 ${fmtAmount(pensionAdj)}` : '—';
+  if (pSub)  pSub.textContent  = pensionAdj ? `${pensionYear}년부터 수령 예정` : '공적자산 탭에서 입력';
+
+  const rDisp = document.getElementById('taBarRetireDisp');
+  const rSub  = document.getElementById('taBarRetireSub');
+  if (rDisp) rDisp.textContent = pa.retirePay ? fmtAmount(pa.retirePay) : '—';
+  if (rSub)  rSub.textContent  = pa.retirePay ? 'IRP 이전 예정' : '공적자산 탭에서 입력';
+
+  const barSum = document.getElementById('taBarRetireSummary');
+  if (barSum) barSum.innerHTML = pa.retirePay ? _buildRetireSummaryHTML(pa) : '공적자산 탭에서 급여·날짜를 입력하면 자동 계산됩니다.';
+}
+
+// 공적자산 탭 열릴 때 — 입력 복원 후 계산
+function renderPublicTab() {
+  const pa = loadPublicAssets();
+  const pyEl = document.getElementById('taPensionYear');
+  const msEl = document.getElementById('taMonthSalary');
+  const jdEl = document.getElementById('taJoinDate');
+  const rdEl = document.getElementById('taRetireDate');
+  if (pyEl) pyEl.value = pa.pensionYear || 2042;
+  if (msEl && pa.monthSalary) msEl.value = pa.monthSalary;
+  if (jdEl && pa.joinDate)   jdEl.value = pa.joinDate;
+  if (rdEl && pa.retireDate) rdEl.value = pa.retireDate;
+  calcPension();
+  if (pa.retirePay && pa.retirePay > 0) {
+    const rDisp = document.getElementById('taRetireDisp');
+    const rSub  = document.getElementById('taRetireSub');
+    const workDays = Math.floor((new Date(pa.retireDate) - new Date(pa.joinDate)) / 86400000);
+    if (rDisp) rDisp.textContent = fmtAmount(pa.retirePay);
+    if (rSub)  rSub.textContent  = `재직 ${(workDays/365).toFixed(1)}년 · IRP 이전 예정`;
+    renderRetireSummary(pa);
+  }
 }
 
 // ══════════════════════════════════════════════════════════════════════
