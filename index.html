@@ -534,12 +534,29 @@
         <div class="ta-public-item">
           <div class="ta-di-label">퇴직금 예상액 (IRP 이전)</div>
           <div class="ta-di-value" id="taRetireDisp" style="color:#0369a1">—</div>
-          <div class="ta-di-sub">은퇴 시 IRP 계좌에 이전 예정</div>
-          <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-            <input type="number" id="taRetirePay" placeholder="0" step="1000000"
-                   style="width:140px;padding:4px 7px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:inherit"
-                   onchange="savePublicAssets()">
-            <span style="font-size:11px;color:var(--text-muted)">원 (직접 입력)</span>
+          <div class="ta-di-sub" id="taRetireSub">입사일·급여 입력 시 자동 계산</div>
+          <div style="margin-top:8px;display:grid;gap:5px">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+              <span style="font-size:11px;color:var(--text-muted);width:90px">월 평균임금</span>
+              <input type="number" id="taMonthSalary" placeholder="급여(세전,원)" step="100000"
+                     style="flex:1;min-width:120px;padding:4px 7px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:inherit"
+                     oninput="calcRetirePay()">
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+              <span style="font-size:11px;color:var(--text-muted);width:90px">입사일</span>
+              <input type="date" id="taJoinDate" value="2022-09-01"
+                     style="flex:1;padding:4px 7px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:inherit"
+                     oninput="calcRetirePay()">
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+              <span style="font-size:11px;color:var(--text-muted);width:90px">은퇴 예정일</span>
+              <input type="date" id="taRetireDate" value="2031-09-01"
+                     style="flex:1;padding:4px 7px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:inherit"
+                     oninput="calcRetirePay()">
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">
+              ※ 세전 기준. 퇴직소득세 별도. 상여 포함 월 평균으로 입력하세요.
+            </div>
           </div>
         </div>
         <div class="ta-public-item" style="background:#f0fdf4">
@@ -2300,15 +2317,66 @@ const PUBLIC_ASSETS_KEY = 'public_assets_v1';
 function loadPublicAssets() {
   try {
     const s = localStorage.getItem(PUBLIC_ASSETS_KEY);
-    return s ? JSON.parse(s) : { pensionMonthly: 1901000, pensionYear: 2042, retirePay: 0 };
-  } catch { return { pensionMonthly: 1901000, pensionYear: 2042, retirePay: 0 }; }
+    return s ? JSON.parse(s) : {
+      pensionMonthly: 1901000, pensionYear: 2042,
+      monthSalary: 0, joinDate: '2022-09-01', retireDate: '2031-09-01'
+    };
+  } catch {
+    return { pensionMonthly: 1901000, pensionYear: 2042,
+             monthSalary: 0, joinDate: '2022-09-01', retireDate: '2031-09-01' };
+  }
+}
+
+// 퇴직금 자동 계산 (근로기준법 공식)
+// 퇴직금 = 1일 평균임금 × 30일 × (재직일수 ÷ 365)
+// 1일 평균임금 = 월평균임금 × 3 ÷ 91일 (3개월 평균 일수)
+function calcRetirePay() {
+  const salary    = parseFloat(document.getElementById('taMonthSalary')?.value  || '0');
+  const joinStr   = document.getElementById('taJoinDate')?.value   || '2022-09-01';
+  const retireStr = document.getElementById('taRetireDate')?.value || '2031-09-01';
+
+  const joinDate   = new Date(joinStr);
+  const retireDate = new Date(retireStr);
+  const workDays   = Math.floor((retireDate - joinDate) / (1000 * 60 * 60 * 24));
+
+  if (salary <= 0 || workDays <= 0) {
+    const dispEl = document.getElementById('taRetireDisp');
+    const subEl  = document.getElementById('taRetireSub');
+    if (dispEl) dispEl.textContent = '—';
+    if (subEl)  subEl.textContent  = '월 평균임금과 날짜를 입력하세요';
+    return;
+  }
+
+  const workYears      = (workDays / 365).toFixed(2);
+  const dailyAvgWage   = (salary * 3) / 91;          // 1일 평균임금
+  const retirePay      = Math.round(dailyAvgWage * 30 * (workDays / 365));
+
+  const dispEl = document.getElementById('taRetireDisp');
+  const subEl  = document.getElementById('taRetireSub');
+  if (dispEl) dispEl.textContent = fmtAmount(retirePay);
+  if (subEl)  subEl.textContent  =
+    `재직 ${workYears}년 · 1일 평균임금 ${fmtAmount(Math.round(dailyAvgWage))} · IRP 이전 예정`;
+
+  // 저장
+  const pa = loadPublicAssets();
+  pa.monthSalary = salary;
+  pa.joinDate    = joinStr;
+  pa.retireDate  = retireStr;
+  pa.retirePay   = retirePay;
+  localStorage.setItem(PUBLIC_ASSETS_KEY, JSON.stringify(pa));
+
+  // 은퇴 준비 요약 갱신
+  renderRetireSummary(pa);
 }
 
 function savePublicAssets() {
   const pa = {
     pensionMonthly: parseInt(document.getElementById('taPensionMonthly')?.value || '0') || 1901000,
     pensionYear:    parseInt(document.getElementById('taPensionYear')?.value    || '0') || 2042,
-    retirePay:      parseInt(document.getElementById('taRetirePay')?.value      || '0') || 0,
+    monthSalary:    parseFloat(document.getElementById('taMonthSalary')?.value  || '0'),
+    joinDate:       document.getElementById('taJoinDate')?.value   || '2022-09-01',
+    retireDate:     document.getElementById('taRetireDate')?.value || '2031-09-01',
+    retirePay:      parseInt(document.getElementById('taRetireDisp')?.dataset?.raw || '0'),
   };
   localStorage.setItem(PUBLIC_ASSETS_KEY, JSON.stringify(pa));
   renderPublicAssets(pa);
@@ -2317,49 +2385,75 @@ function savePublicAssets() {
 function renderPublicAssets(pa) {
   if (!pa) pa = loadPublicAssets();
 
-  // 입력란 복원
+  // 국민연금 입력란 복원
   const pmEl = document.getElementById('taPensionMonthly');
   const pyEl = document.getElementById('taPensionYear');
-  const rpEl = document.getElementById('taRetirePay');
   if (pmEl && !pmEl.value) pmEl.value = pa.pensionMonthly || '';
   if (pyEl && !pyEl.value) pyEl.value = pa.pensionYear    || '';
-  if (rpEl && !rpEl.value) rpEl.value = pa.retirePay      || '';
+
+  // 퇴직금 관련 입력란 복원
+  const msEl = document.getElementById('taMonthSalary');
+  const jdEl = document.getElementById('taJoinDate');
+  const rdEl = document.getElementById('taRetireDate');
+  if (msEl && !msEl.value && pa.monthSalary) msEl.value = pa.monthSalary;
+  if (jdEl && pa.joinDate)   jdEl.value = pa.joinDate;
+  if (rdEl && pa.retireDate) rdEl.value = pa.retireDate;
 
   // 국민연금 표시
   const pDisp = document.getElementById('taPensionDisp');
   const pSub  = document.getElementById('taPensionSub');
-  if (pDisp) pDisp.textContent = `월 ${fmtAmount(pa.pensionMonthly)}`;
+  if (pDisp) pDisp.textContent = `월 ${fmtAmount(pa.pensionMonthly || 1901000)}`;
   if (pSub) {
-    const curYear = new Date().getFullYear();
-    const yearsLeft = pa.pensionYear - curYear;
-    // 20년 수령 기준 단순 총액 참고값
-    const totalRef = pa.pensionMonthly * 12 * 20;
-    pSub.textContent = `${pa.pensionYear}년부터 · 지금부터 ${yearsLeft}년 후 · 20년 수령 시 참고 총액 ${fmtAmount(totalRef)}`;
+    const curYear   = new Date().getFullYear();
+    const yearsLeft = (pa.pensionYear || 2042) - curYear;
+    const totalRef  = (pa.pensionMonthly || 1901000) * 12 * 20;
+    pSub.textContent = `${pa.pensionYear||2042}년부터 · ${yearsLeft}년 후 · 20년 수령 참고 총액 ${fmtAmount(totalRef)}`;
   }
 
-  // 퇴직금 표시
+  // 퇴직금 — 저장된 값이 있으면 표시, 없으면 안내
   const rDisp = document.getElementById('taRetireDisp');
-  if (rDisp) rDisp.textContent = pa.retirePay ? fmtAmount(pa.retirePay) : '직접 입력 필요';
-
-  // 은퇴 준비 요약
-  const sumEl = document.getElementById('taRetireSummary');
-  if (sumEl) {
-    const retireYear  = 2031;
-    const curYear     = new Date().getFullYear();
-    const gapYears    = pa.pensionYear - retireYear;           // 공백기
-    const toRetire    = retireYear - curYear;                  // 은퇴까지 남은 연수
-    const { total }   = calculateTotalAssets();
-    const monthlyNeed = 3000000;                               // 월 생활비 기본값 (추후 입력 가능)
-    const gapNeed     = monthlyNeed * 12 * gapYears;           // 공백기 필요 총액
-    const gapSurplus  = total + (pa.retirePay || 0) - gapNeed;
-    const ok          = gapSurplus >= 0;
-
-    sumEl.innerHTML =
-      `🎯 은퇴 목표: <b>${retireYear}년</b> (${toRetire}년 후)<br>` +
-      `⏳ 연금 공백기: <b>${gapYears}년</b> (${retireYear}~${pa.pensionYear})<br>` +
-      `💸 공백기 예상 필요액: <b>${fmtAmount(gapNeed)}</b> <span style="font-size:10px;color:var(--text-muted)">(월 ${fmtAmount(monthlyNeed)} 기준)</span><br>` +
-      `<span style="color:${ok?'#059669':'#dc2626'};font-weight:700">${ok ? '✅ 현재 자산으로 공백기 커버 가능' : '⚠️ 공백기 부족 — 추가 자산 필요'}</span>`;
+  const rSub  = document.getElementById('taRetireSub');
+  if (pa.retirePay && pa.retirePay > 0) {
+    if (rDisp) rDisp.textContent = fmtAmount(pa.retirePay);
+    if (rSub && pa.monthSalary) {
+      const workDays  = Math.floor((new Date(pa.retireDate) - new Date(pa.joinDate)) / 86400000);
+      if (rSub) rSub.textContent = `재직 ${(workDays/365).toFixed(1)}년 · IRP 이전 예정`;
+    }
+  } else {
+    if (rDisp) rDisp.textContent = '—';
+    if (rSub)  rSub.textContent  = '월 평균임금을 입력하면 자동 계산';
   }
+
+  renderRetireSummary(pa);
+}
+
+function renderRetireSummary(pa) {
+  if (!pa) pa = loadPublicAssets();
+  const sumEl = document.getElementById('taRetireSummary');
+  if (!sumEl) return;
+
+  const retireDate  = new Date(pa.retireDate || '2031-09-01');
+  const retireYear  = retireDate.getFullYear();
+  const pensionYear = pa.pensionYear || 2042;
+  const curYear     = new Date().getFullYear();
+  const gapYears    = pensionYear - retireYear;
+  const toRetire    = retireYear - curYear;
+
+  const { total }   = calculateTotalAssets();
+  const retirePay   = pa.retirePay || 0;
+  const monthlyNeed = 3000000; // 월 생활비 기준 (4단계에서 사용자 입력으로 확장 예정)
+  const gapNeed     = monthlyNeed * 12 * gapYears;
+  const totalAtRetire = total + retirePay;
+  const surplus     = totalAtRetire - gapNeed;
+  const ok          = surplus >= 0;
+
+  sumEl.innerHTML =
+    `🎯 은퇴 목표: <b>${retireYear}년</b> (${toRetire > 0 ? toRetire + '년 후' : '올해'})<br>` +
+    `⏳ 연금 공백기: <b>${gapYears}년</b> (${retireYear}~${pensionYear}년)<br>` +
+    `💸 공백기 필요액: <b>${fmtAmount(gapNeed)}</b><span style="font-size:10px;color:var(--text-muted)"> (월 ${fmtAmount(monthlyNeed)} × ${gapYears*12}개월)</span><br>` +
+    `📦 은퇴 시 가용자산: <b>${fmtAmount(totalAtRetire)}</b><span style="font-size:10px;color:var(--text-muted)"> (현 순자산 + 퇴직금)</span><br>` +
+    `<span style="color:${ok?'#059669':'#dc2626'};font-weight:700">` +
+    `${ok ? `✅ 공백기 후 ${fmtAmount(surplus)} 여유` : `⚠️ ${fmtAmount(Math.abs(surplus))} 부족 — 자산 확대 필요`}</span>`;
 }
 
 // ══════════════════════════════════════════════════════════════════════
