@@ -1838,7 +1838,7 @@ function renderPFAccounts() {
               oninput="pfUpdateH(${acc.id},${h.id},'qty',parseFloat(this.value)||0); pfRerenderCard(${acc.id},${h.id})">
           </div>
           <div class="hf">
-            <label>현재가 (원) ⚠️직접입력</label>
+            <label>현재가 (원) ${h.priceSource ? `🔄 ${escHtml(h.priceSource)}` : '✏️ 직접입력'}</label>
             <input type="number" value="${h.currentPrice||''}" placeholder="0" min="0" step="100"
               oninput="pfUpdateH(${acc.id},${h.id},'currentPrice',parseFloat(this.value)||0); pfUpdatePriceDate(${acc.id},${h.id}); pfRerenderCard(${acc.id},${h.id})">
           </div>
@@ -1926,7 +1926,7 @@ function renderPFAccounts() {
         <div style="font-size:12px;font-weight:600;color:var(--text-sub);margin-bottom:6px">
           보유 종목 (${acc.holdings.length}개)
           <span style="float:right;font-size:11px;font-weight:400;color:var(--text-muted)">
-            ⚠️ 실시간 조회 불가 — 현재가 직접 입력
+            현재가: 🔄 자동갱신 또는 직접 입력 가능
           </span>
         </div>
         <div class="holding-list">${holdingsHtml}</div>
