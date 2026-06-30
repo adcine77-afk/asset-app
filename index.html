@@ -2339,12 +2339,12 @@ function calcPension() {
   const pensionYear= parseInt(document.getElementById('taPensionYear')?.value)         || pa0.pensionYear       || 2042;
   const retireDate = document.getElementById('taRetireDate')?.value                    || pa0.retireDate        || '2031-09-01';
 
-  // 지금부터 은퇴일까지 추가 납부 개월수 계산
+  // 지금부터 연금 수령 연도까지 추가 납부 개월수 계산
   const today        = new Date();
-  const retireDt     = new Date(retireDate);
+  const pensionStart = new Date(pensionYear, 0, 1); // 해당 연도 1월 1일
   const addMonths    = Math.max(0, Math.round(
-    (retireDt.getFullYear() - today.getFullYear()) * 12 +
-    (retireDt.getMonth() - today.getMonth())
+    (pensionStart.getFullYear() - today.getFullYear()) * 12 +
+    (pensionStart.getMonth() - today.getMonth())
   ));
   const totalMonths  = curMonths + addMonths;          // 은퇴 시점 총 납부 개월수
   const ratio        = Math.min(totalMonths / fullMonths, 1); // 최대 1 (초과 납부 없음)
