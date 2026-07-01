@@ -754,7 +754,9 @@
     <div id="chartEmpty" style="display:none;text-align:center;padding:40px 0;color:var(--text-muted);font-size:14px;">이번 달 지출 내역이 없습니다.</div>
   </div>
 
-  <div class="notice">⚠️ 실시간 시세 자동 조회 불가 — 투자 자산 현재가는 직접 확인 후 입력해 주세요.</div>
+  <div class="notice">🔄 국내·해외 종목 시세는 GitHub Actions로 하루 2회 자동 갱신됩니다.
+      갱신 후 '최신 시세로 갱신' 버튼을 눌러 적용하세요.
+      ⚠️ 자동 수집 데이터는 참고용이며, 정확한 거래는 증권사 앱에서 직접 확인하세요.</div>
 
 </div><!-- /tabLedger -->
 
@@ -766,7 +768,8 @@
 
   <!-- 면책 문구 -->
   <div class="notice pink">
-    🏠 시세는 직접 입력한 값입니다. 실거래가는 <b>국토교통부 실거래가 공개시스템(rt.molit.go.kr)</b> 등에서 직접 확인하세요.
+    🏠 아파트 시세는 국토부 실거래가 API 자동 조회값, 나머지는 직접 입력값입니다.
+    실거래가 확인: <b>국토교통부 실거래가 공개시스템(rt.molit.go.kr)</b>
   </div>
 
   <!-- 요약 카드 4개 -->
@@ -900,7 +903,9 @@
     <div class="timeline" id="reTimeline"></div>
   </div>
 
-  <div class="notice">⚠️ 부동산 시세 자동 조회 불가 — 시세·감정평가·양도세는 전문가(세무사·공인중개사) 확인을 권장합니다.</div>
+  <div class="notice">🔄 홍제센트럴아이파크 아파트 시세는 국토부 실거래가 API로 매월 1일 자동 조회됩니다.
+      빌라·지산·상가는 직접 입력 후 저장하세요.
+      ⚠️ 시세·양도세 계산은 참고용이며, 정확한 금액은 세무사·공인중개사 확인을 권장합니다.</div>
 
 </div><!-- /tabRE -->
 
@@ -1318,7 +1323,6 @@ function renderDashboard() {
   // ── 섹션 5: 다가오는 부동산 이벤트 (미래 이벤트 최대 3개) ─────────────
   const eventsEl = el('dbEvents');
   if (eventsEl) {
-    const todayMs  = Date.now();
     const upcoming = getTimelineEvents()
       .filter(ev => new Date(ev.year, (ev.month||1)-1, 1) > now)
       .sort((a,b) => a.year*100+(a.month||1) - (b.year*100+(b.month||1)))
@@ -2758,11 +2762,25 @@ function settleAccumulatedSavings() {
 }
 
 // 부동산 순자산 (원)
+function getLoanBalance(l) {
+  const curYear = new Date().getFullYear();
+  if (l.type === 'interest') return l.principal || 0;
+  // 원리금균등(equal): 현재 연도 기준 실제 잔액 계산
+  if (l.start > curYear) return 0;   // 아직 미실행 대출
+  const r  = l.rate / 100 / 12;
+  const n  = l.term * 12;
+  const el = (curYear - l.start) * 12;
+  if (el >= n) return 0;             // 상환 완료
+  if (r === 0) return Math.round(l.principal * (n - el) / n);
+  const balance = l.principal * (Math.pow(1+r, n) - Math.pow(1+r, el)) / (Math.pow(1+r, n) - 1);
+  return Math.round(balance);
+}
+
 function getRENetAssets() {
   if (!reState || !reLoans) return 0;
   const totalAsset = RE_ASSET_DEFS.reduce((s, d) => s + (reState.assets[d.id]?.value || 0), 0);
   const jReceived  = JEONSE_DEFS.reduce((s, d) => s + (reState.jeonse?.received[d.id] || 0), 0);
-  const loanTotal  = reLoans.reduce((s, l) => s + (l.principal || 0), 0);
+  const loanTotal  = reLoans.reduce((s, l) => s + getLoanBalance(l), 0);
   const jeonsePaid = reState.jeonse?.paid?.amount || 0;
   return totalAsset + jeonsePaid - jReceived - loanTotal;
 }
