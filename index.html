@@ -1935,7 +1935,10 @@ async function fetchREPrices() {
     const areaFloor = apt.area ? ` ${apt.area}㎡` : '';
     const floorStr  = apt.floor ? ` ${apt.floor}층` : '';
     if (statusEl) {
-      statusEl.innerHTML = `✅ 국토부 실거래가 기준 ${apt.dealDate} 반영 — ${fmtAmount(apt.price)}${areaFloor}${floorStr}<br>`
+      const summary = apt.dealDate
+        ? `✅ 국토부 실거래가 기준 ${apt.dealDate} 반영 — ${fmtAmount(apt.price)}${areaFloor}${floorStr}`
+        : `ℹ️ 이번 달 실거래 데이터 없음 — 초기 입력값 유지: ${fmtAmount(apt.price)}`;
+      statusEl.innerHTML = `${summary}<br>`
         + '<span style="font-size:11px;color:var(--text-muted)">⚠️ 국토부 실거래가는 계약 후 최대 30일 후 신고되므로 현재 시세와 다를 수 있습니다.</span>';
     }
   } catch (e) {
