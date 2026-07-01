@@ -1870,15 +1870,16 @@ function renderREAssets() {
 
 function reFreshnessBadge(lastUpdated, id) {
   if (!lastUpdated) return `<span style="font-size:10px;background:#f3f4f6;color:#6b7280;padding:2px 6px;border-radius:10px">미입력</span>`;
-  const days = Math.floor((Date.now() - new Date(lastUpdated).getTime()) / 86400000);
-  const months = days / 30;
-  const threshold = id === 'apt' ? 3 : 6;  // 아파트 3개월, 기타 6개월
-  const [emoji, color, bg] = months < threshold / 2
-    ? ['🟢', '#15803d', '#dcfce7']
-    : months < threshold
-    ? ['🟡', '#92400e', '#fef3c7']
-    : ['🔴', '#dc2626', '#fee2e2'];
-  return `<span style="font-size:10px;background:${bg};color:${color};padding:2px 6px;border-radius:10px">${emoji} ${lastUpdated}</span>`;
+  const months = (Date.now() - new Date(lastUpdated).getTime()) / (86400000 * 30);
+  const threshold = id === 'apt' ? 3 : 6;
+  if (months < threshold / 2) {
+    return `<span style="font-size:10px;background:#dcfce7;color:#15803d;padding:2px 6px;border-radius:10px">🟢 최신</span>`;
+  } else if (months < threshold) {
+    const mo = Math.round(months);
+    return `<span style="font-size:10px;background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:10px">🟡 ${mo}개월 전</span>`;
+  } else {
+    return `<span style="font-size:10px;background:#fee2e2;color:#dc2626;padding:2px 6px;border-radius:10px">🔴 업데이트 필요</span>`;
+  }
 }
 
 function renderREFreshness() {
@@ -1915,17 +1916,30 @@ async function fetchREPrices() {
     const resp = await fetch(url + '?t=' + Date.now());
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const data = await resp.json();
-    const ref = data?.apt?.reference;
-    if (!ref || !ref.amount) throw new Error('re_prices.json에 기준 거래가 없습니다.');
-    reState.assets['apt'].value = ref.amount;
-    reState.assets['apt'].lastUpdated = data.updated ? data.updated.slice(0, 10) : new Date().toISOString().slice(0, 10);
+    const apt = data?.apt;
+    if (!apt?.price) {
+      // 거래 없는 달 또는 데이터 없음
+      if (statusEl) {
+        statusEl.innerHTML = '⚠️ 이번 달 거래 없음 — 이전 값 유지<br>'
+          + '<span style="font-size:11px;color:#92400e">⚠️ 국토부 실거래가는 계약 후 최대 30일 후 신고되므로 현재 시세와 다를 수 있습니다.</span>';
+      }
+      return;
+    }
+    reState.assets['apt'].value = apt.price;
+    reState.assets['apt'].lastUpdated = apt.dealDate
+      ? apt.dealDate.slice(0, 7)   // "YYYY-MM" 형식 사용
+      : new Date().toISOString().slice(0, 10);
     saveRE();
     renderREAssets();
     renderRESummary();
     renderSimulation();
     renderREFreshness();
-    const msg = `✅ 아파트 시세 업데이트: ${fmtAmount(ref.amount)} (${ref.date}, ${ref.area}㎡ ${ref.floor}층 실거래)`;
-    if (statusEl) statusEl.textContent = msg;
+    const areaFloor = apt.area ? ` ${apt.area}㎡` : '';
+    const floorStr  = apt.floor ? ` ${apt.floor}층` : '';
+    if (statusEl) {
+      statusEl.innerHTML = `✅ 국토부 실거래가 기준 ${apt.dealDate} 반영 — ${fmtAmount(apt.price)}${areaFloor}${floorStr}<br>`
+        + '<span style="font-size:11px;color:var(--text-muted)">⚠️ 국토부 실거래가는 계약 후 최대 30일 후 신고되므로 현재 시세와 다를 수 있습니다.</span>';
+    }
   } catch (e) {
     if (statusEl) statusEl.textContent = '❌ 오류: ' + e.message;
   } finally {
