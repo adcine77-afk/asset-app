@@ -477,7 +477,8 @@
     <div style="font-size:12px; color:var(--text-muted)" id="headerSub">가계부</div>
   </div>
   <div class="tab-nav">
-    <button class="tab-btn active" id="tabBtnLedger" onclick="switchTab('ledger')">📒 가계부</button>
+    <button class="tab-btn active" id="tabBtnDashboard" onclick="switchTab('dashboard')">📊 대시보드</button>
+    <button class="tab-btn" id="tabBtnLedger" onclick="switchTab('ledger')">📒 가계부</button>
     <button class="tab-btn re-tab" id="tabBtnRE" onclick="switchTab('re')">🏠 부동산</button>
     <button class="tab-btn" id="tabBtnPF" onclick="switchTab('pf')">📈 주식</button>
     <button class="tab-btn" id="tabBtnSavings" onclick="switchTab('savings')">🏦 예적금</button>
@@ -554,9 +555,101 @@
 <main>
 
 <!-- ══════════════════════════════════════════════════════════
+     대시보드 탭
+══════════════════════════════════════════════════════════ -->
+<div id="tabDashboard">
+  <!-- 섹션 1: 순자산 히어로 -->
+  <div id="dbHero" style="background:linear-gradient(135deg,#1e3a5f 0%,#2d6a9f 50%,#1a5276 100%);border-radius:var(--radius);padding:24px 20px 20px;color:#fff;margin-bottom:0">
+    <div style="font-size:12px;opacity:.75;margin-bottom:6px;letter-spacing:.5px">전체 순자산</div>
+    <div style="font-size:32px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px" id="dbTotalAmt">계산 중...</div>
+    <div style="font-size:13px;opacity:.8;margin-bottom:18px" id="dbMonthDelta">—</div>
+    <div style="background:rgba(255,255,255,.15);border-radius:6px;height:8px;overflow:hidden">
+      <div id="dbAssetBar" style="height:100%;display:flex"></div>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:11px;opacity:.85" id="dbAssetLegend"></div>
+  </div>
+
+  <!-- 섹션 2: 자산 구성 2×2 그리드 -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" id="dbAssetGrid">
+    <div class="card" style="cursor:pointer;margin:0" onclick="switchTab('re')">
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">🏠 부동산 순자산</div>
+      <div style="font-size:20px;font-weight:700;color:var(--re)" id="dbReVal">—</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:3px" id="dbReSub">—</div>
+    </div>
+    <div class="card" style="cursor:pointer;margin:0" onclick="switchTab('pf')">
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">📈 주식 포트폴리오</div>
+      <div style="font-size:20px;font-weight:700;color:#6d28d9" id="dbPfVal">—</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:3px" id="dbPfSub">—</div>
+    </div>
+    <div class="card" style="cursor:pointer;margin:0" onclick="switchTab('savings')">
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">🏦 예적금</div>
+      <div style="font-size:20px;font-weight:700;color:#059669" id="dbSvVal">—</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:3px" id="dbSvSub">—</div>
+    </div>
+    <div class="card" style="cursor:pointer;margin:0" onclick="switchTab('ledger')">
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">💵 현금성 자산</div>
+      <div style="font-size:20px;font-weight:700;color:#0369a1" id="dbCashVal">—</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:3px" id="dbCashSub">—</div>
+    </div>
+  </div>
+
+  <!-- 섹션 3: 이번 달 현금흐름 -->
+  <div class="card">
+    <div class="card-title"><div class="icon" style="background:#ecfdf5">💸</div>이번 달 현금흐름 <span id="dbCurYM" style="font-size:12px;font-weight:400;color:var(--text-muted)"></span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
+      <div style="text-align:center">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">수입</div>
+        <div style="font-size:17px;font-weight:700;color:var(--income)" id="dbIncome">—</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">지출</div>
+        <div style="font-size:17px;font-weight:700;color:var(--expense)" id="dbExpense">—</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">잉여</div>
+        <div style="font-size:17px;font-weight:700" id="dbSurplus">—</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span style="font-size:12px;color:var(--text-muted)">월 저축 목표:</span>
+      <input type="number" id="dbSavingsGoalPct" placeholder="예: 30" min="1" max="100" step="1"
+             style="width:60px;padding:4px 7px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:inherit"
+             oninput="renderDashboard()">
+      <span style="font-size:12px;color:var(--text-muted)">%</span>
+      <div style="flex:1;min-width:120px;background:#e2e8f0;border-radius:4px;height:8px;overflow:hidden">
+        <div id="dbGoalBar" style="height:100%;background:var(--income);border-radius:4px;transition:width .3s;width:0%"></div>
+      </div>
+      <span style="font-size:12px;font-weight:600" id="dbGoalLabel"></span>
+    </div>
+  </div>
+
+  <!-- 섹션 4: 공백기 생존 진단 -->
+  <div class="card" style="cursor:pointer" onclick="switchTab('public')">
+    <div class="card-title"><div class="icon" style="background:#f0fdf4">⏳</div>은퇴 공백기 생존 진단 <span style="font-size:11px;font-weight:400;color:var(--text-muted)">→ 공적자산 탭 상세</span></div>
+    <div id="dbRetireDiag" style="font-size:13px;line-height:2;color:var(--text)"></div>
+  </div>
+
+  <!-- 섹션 5: 부동산 다음 이벤트 -->
+  <div class="card">
+    <div class="card-title"><div class="icon" style="background:#fdf2f8">📅</div>다가오는 부동산 이벤트 <a href="#" onclick="switchTab('re');return false" style="font-size:11px;font-weight:400;color:var(--primary);margin-left:8px">전체 타임라인 →</a></div>
+    <div id="dbEvents" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+
+  <!-- 섹션 6: 주식 알림 -->
+  <div class="card">
+    <div class="card-title"><div class="icon" style="background:#f5f3ff">🔔</div>주식 알림 <a href="#" onclick="switchTab('pf');return false" style="font-size:11px;font-weight:400;color:var(--primary);margin-left:8px">주식 탭에서 업데이트 →</a></div>
+    <div id="dbStockAlerts"></div>
+    <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px">계좌별 상위 수익 / 손실 종목</div>
+      <div id="dbTopMovers" style="display:flex;flex-direction:column;gap:4px"></div>
+    </div>
+  </div>
+</div><!-- /tabDashboard -->
+
+<!-- ══════════════════════════════════════════════════════════
      가계부 탭
 ══════════════════════════════════════════════════════════ -->
-<div id="tabLedger">
+<div id="tabLedger" style="display:none">
 
   <div class="month-nav">
     <button onclick="changeMonth(-1)">&#8592;</button>
@@ -880,6 +973,48 @@
 
   <div class="notice">ℹ️ prices.json에 없는 종목은 기존 수동 입력값을 그대로 유지합니다. "최신 시세로 갱신" 버튼을 눌러야만 업데이트되며, 자동으로 덮어쓰지 않습니다.</div>
 
+  <!-- ── AI 포트폴리오 자문 ──────────────────────────────────────────── -->
+  <div class="card" style="border:1.5px solid #c4b5fd">
+    <div class="card-title"><div class="icon" style="background:#f5f3ff">🤖</div>AI 포트폴리오 자문
+      <span style="font-size:11px;font-weight:400;color:var(--text-muted);margin-left:6px">Claude API · 참고용</span>
+    </div>
+
+    <!-- API 키 입력 -->
+    <div id="aiKeySection" style="margin-bottom:14px">
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px">Anthropic API 키 (sk-ant-로 시작)</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="password" id="aiApiKeyInput" placeholder="sk-ant-api03-..."
+               style="flex:1;padding:7px 10px;border:1px solid #c4b5fd;border-radius:6px;font-size:13px;font-family:inherit"
+               oninput="saveAIKey()">
+        <button onclick="clearAIKey()" style="padding:7px 12px;border:1px solid var(--border);border-radius:6px;background:none;cursor:pointer;font-size:12px;color:var(--text-muted)">삭제</button>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:5px">
+        🔒 API 키는 이 기기의 브라우저에만 저장됩니다. 외부 서버로 전송되지 않으며, Anthropic API 호출 시에만 사용됩니다.
+      </div>
+    </div>
+
+    <!-- 자문 버튼 -->
+    <button id="aiAdviseBtn" onclick="callAIAdvisor()"
+            style="width:100%;padding:11px;background:linear-gradient(135deg,#6d28d9,#4f46e5);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s">
+      🤖 AI 자문 받기
+    </button>
+
+    <!-- 결과 영역 -->
+    <div id="aiResult" style="display:none;margin-top:16px">
+      <div style="background:#f5f3ff;border:1px solid #c4b5fd;border-radius:8px;padding:16px">
+        <div style="font-size:13px;line-height:1.9;color:var(--text)" id="aiResultText"></div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:10px;padding-top:8px;border-top:1px solid #ddd6fe" id="aiResultTs"></div>
+      </div>
+      <div style="font-size:11px;color:#92400e;background:#fef3c7;padding:8px 10px;border-radius:6px;margin-top:8px;line-height:1.6">
+        ⚠️ 본 AI 자문은 참고용입니다. Claude API를 통해 생성된 의견이며, 실제 투자 결정은 본인 판단과 공인 전문가 상담을 병행하시기 바랍니다. 과거 수익률이 미래를 보장하지 않습니다.
+      </div>
+      <button onclick="callAIAdvisor()" style="margin-top:10px;padding:8px 16px;border:1px solid #c4b5fd;border-radius:6px;background:none;cursor:pointer;font-size:13px;color:#6d28d9;font-weight:600">🔄 다시 분석</button>
+    </div>
+
+    <!-- 에러 영역 -->
+    <div id="aiError" style="display:none;margin-top:12px;font-size:12px;color:#dc2626;background:#fef2f2;padding:10px;border-radius:6px"></div>
+  </div>
+
 </div><!-- /tabPortfolio -->
 
 <!-- ══════════════════════════════════════════════════════════
@@ -1036,26 +1171,186 @@ function toggleCollapse(bodyId, headerId) {
 // ══════════════════════════════════════════════════════════════════════
 //  탭 전환
 // ══════════════════════════════════════════════════════════════════════
-let currentTab = 'ledger';
+let currentTab = 'dashboard';
 function switchTab(tab) {
   currentTab = tab;
-  document.getElementById('tabLedger').style.display    = tab === 'ledger'  ? 'contents' : 'none';
-  document.getElementById('tabRE').style.display        = tab === 're'      ? 'contents' : 'none';
-  document.getElementById('tabPortfolio').style.display = tab === 'pf'      ? 'contents' : 'none';
-  document.getElementById('tabSavings').style.display   = tab === 'savings' ? 'contents' : 'none';
-  document.getElementById('tabPublic').style.display    = tab === 'public'  ? 'contents' : 'none';
-  document.getElementById('tabBtnLedger').classList.toggle('active',  tab === 'ledger');
-  document.getElementById('tabBtnRE').classList.toggle('active',      tab === 're');
-  document.getElementById('tabBtnPF').classList.toggle('active',      tab === 'pf');
-  document.getElementById('tabBtnSavings').classList.toggle('active', tab === 'savings');
-  document.getElementById('tabBtnPublic').classList.toggle('active',  tab === 'public');
-  const labels = { ledger:'가계부', re:'부동산', pf:'주식', savings:'예적금', public:'공적자산' };
+  document.getElementById('tabDashboard').style.display = tab === 'dashboard'? 'contents' : 'none';
+  document.getElementById('tabLedger').style.display    = tab === 'ledger'   ? 'contents' : 'none';
+  document.getElementById('tabRE').style.display        = tab === 're'       ? 'contents' : 'none';
+  document.getElementById('tabPortfolio').style.display = tab === 'pf'       ? 'contents' : 'none';
+  document.getElementById('tabSavings').style.display   = tab === 'savings'  ? 'contents' : 'none';
+  document.getElementById('tabPublic').style.display    = tab === 'public'   ? 'contents' : 'none';
+  document.getElementById('tabBtnDashboard').classList.toggle('active', tab === 'dashboard');
+  document.getElementById('tabBtnLedger').classList.toggle('active',    tab === 'ledger');
+  document.getElementById('tabBtnRE').classList.toggle('active',        tab === 're');
+  document.getElementById('tabBtnPF').classList.toggle('active',        tab === 'pf');
+  document.getElementById('tabBtnSavings').classList.toggle('active',   tab === 'savings');
+  document.getElementById('tabBtnPublic').classList.toggle('active',    tab === 'public');
+  const labels = { dashboard:'대시보드', ledger:'가계부', re:'부동산', pf:'주식', savings:'예적금', public:'공적자산' };
   document.getElementById('headerSub').textContent = labels[tab] || '';
+  if (tab === 'dashboard') renderDashboard();
   if (tab === 're') renderRE();
   if (tab === 'pf') renderPF();
   if (tab === 'savings') renderSavingsTab();
   if (tab === 'public') renderPublicTab();
   renderTotalAssetBar();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  ██████  대시보드  ██████
+// ══════════════════════════════════════════════════════════════════════
+function renderDashboard() {
+  const { cash, re, pf, sv, total } = calculateTotalAssets();
+  const now    = new Date();
+  const curYM  = `${now.getFullYear()}-${pad(now.getMonth()+1)}`;
+
+  // ── 섹션 1: 히어로 ──────────────────────────────────────────────────
+  const totalEl = document.getElementById('dbTotalAmt');
+  if (totalEl) totalEl.textContent = fmtAmount(total);
+
+  const curNet = getLedgerMonthlySavings(curYM);
+  const deltaEl = document.getElementById('dbMonthDelta');
+  if (deltaEl) deltaEl.textContent =
+    `이번 달 잉여: ${curNet >= 0 ? '+' : ''}${fmtAmount(curNet)}`;
+
+  // 비율 바
+  const barEl = document.getElementById('dbAssetBar');
+  const legEl = document.getElementById('dbAssetLegend');
+  if (barEl && total > 0) {
+    const segs = [
+      { label:'부동산', val:re,   color:'#ec4899' },
+      { label:'주식',   val:pf,   color:'#8b5cf6' },
+      { label:'예적금', val:sv,   color:'#10b981' },
+      { label:'현금',   val:cash, color:'#3b82f6' },
+    ];
+    barEl.innerHTML = segs.map(s => {
+      const pct = Math.max(0, Math.round(s.val / total * 100));
+      return pct > 0 ? `<div style="width:${pct}%;background:${s.color};opacity:.85"></div>` : '';
+    }).join('');
+    legEl.innerHTML = segs.map(s => {
+      const pct = Math.round(s.val / total * 100);
+      return `<span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${s.color};margin-right:3px"></span>${s.label} ${pct}%</span>`;
+    }).join('');
+  }
+
+  // ── 섹션 2: 자산 구성 카드 ──────────────────────────────────────────
+  const el = id => document.getElementById(id);
+  if (el('dbReVal')) el('dbReVal').textContent = fmtAmount(re);
+  if (el('dbReSub') && reState && reLoans) {
+    const totalAsset = RE_ASSET_DEFS.reduce((s,d)=>s+(reState.assets[d.id]?.value||0),0);
+    const debts = JEONSE_DEFS.reduce((s,d)=>s+(reState.jeonse?.received[d.id]||0),0)
+                  + reLoans.reduce((s,l)=>s+(l.principal||0),0)
+                  - (reState.jeonse?.paid?.amount||0);
+    el('dbReSub').textContent = `시세 ${fmtAmount(totalAsset)} · 부채 ${fmtAmount(debts)}`;
+  }
+  if (el('dbPfVal')) el('dbPfVal').textContent = fmtAmount(pf);
+  if (el('dbPfSub') && pfAccounts) {
+    const cost = pfAccounts.reduce((s,a)=>s+pfAccountCost(a),0);
+    const pnl  = pf - cost;
+    el('dbPfSub').textContent = `손익 ${pnl>=0?'+':''}${fmtAmount(pnl)}`;
+  }
+  if (el('dbSvVal')) el('dbSvVal').textContent = fmtAmount(sv);
+  if (el('dbSvSub')) {
+    const arr = loadSavingsAccounts();
+    el('dbSvSub').textContent = arr.length > 0 ? `${arr.length}개 계좌` : '예적금 탭에서 등록';
+  }
+  if (el('dbCashVal')) el('dbCashVal').textContent = fmtAmount(cash);
+  if (el('dbCashSub')) {
+    const d2 = loadAccSavings();
+    el('dbCashSub').textContent = `초기값 ${fmtAmount(d2.base)} + 누적 ${fmtAmount(d2.settled)}`;
+  }
+
+  // ── 섹션 3: 이번 달 현금흐름 ────────────────────────────────────────
+  if (el('dbCurYM')) el('dbCurYM').textContent = curYM.replace('-','년 ') + '월';
+  const txs = state?.transactions || [];
+  let income = 0, expense = 0;
+  txs.forEach(tx => {
+    if (!tx.date?.startsWith(curYM)) return;
+    if (tx.type === 'income')  income  += tx.amount || 0;
+    if (tx.type === 'expense') expense += tx.amount || 0;
+  });
+  const surplus = income - expense;
+  if (el('dbIncome'))  el('dbIncome').textContent  = fmtAmount(income);
+  if (el('dbExpense')) el('dbExpense').textContent  = fmtAmount(expense);
+  if (el('dbSurplus')) {
+    el('dbSurplus').textContent = (surplus >= 0 ? '+' : '') + fmtAmount(surplus);
+    el('dbSurplus').style.color = surplus >= 0 ? 'var(--income)' : 'var(--expense)';
+  }
+  // 저축률 목표 진행바
+  const goalPctEl = el('dbSavingsGoalPct');
+  const goalPct   = goalPctEl ? parseFloat(goalPctEl.value) || 0 : 0;
+  const goalBar   = el('dbGoalBar');
+  const goalLabel = el('dbGoalLabel');
+  if (goalPct > 0 && income > 0) {
+    const actualPct = Math.round(surplus / income * 100);
+    const barPct    = Math.min(100, Math.max(0, actualPct));
+    if (goalBar)  { goalBar.style.width = barPct + '%'; goalBar.style.background = actualPct >= goalPct ? 'var(--income)' : '#f59e0b'; }
+    if (goalLabel){ goalLabel.textContent = `${actualPct}% / 목표 ${goalPct}%`; goalLabel.style.color = actualPct >= goalPct ? 'var(--income)' : '#d97706'; }
+  } else {
+    if (goalBar)  goalBar.style.width = '0%';
+    if (goalLabel) goalLabel.textContent = '';
+  }
+
+  // ── 섹션 4: 공백기 생존 진단 ────────────────────────────────────────
+  const pa = loadPublicAssets();
+  const diagEl = el('dbRetireDiag');
+  if (diagEl) diagEl.innerHTML = _buildRetireSummaryHTML(pa);
+
+  // ── 섹션 5: 다가오는 부동산 이벤트 (미래 이벤트 최대 3개) ─────────────
+  const eventsEl = el('dbEvents');
+  if (eventsEl) {
+    const todayMs  = Date.now();
+    const upcoming = getTimelineEvents()
+      .filter(ev => new Date(ev.year, (ev.month||1)-1, 1) > now)
+      .sort((a,b) => a.year*100+(a.month||1) - (b.year*100+(b.month||1)))
+      .slice(0, 3);
+    if (upcoming.length === 0) {
+      eventsEl.innerHTML = '<div style="color:var(--text-muted);font-size:13px">예정된 이벤트가 없습니다.</div>';
+    } else {
+      eventsEl.innerHTML = upcoming.map(ev => {
+        const evDate = new Date(ev.year, (ev.month||1)-1, 1);
+        const dday   = Math.ceil((evDate - now) / 86400000);
+        return `<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+          <div style="min-width:54px;text-align:center;background:#fdf2f8;color:var(--re);border-radius:6px;padding:4px 6px;font-size:11px;font-weight:700">D-${dday}</div>
+          <div>
+            <div style="font-size:13px;font-weight:600">${ev.title}</div>
+            <div style="font-size:11px;color:var(--text-muted)">${ev.year}년 ${ev.month||''}월</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // ── 섹션 6: 주식 알림 ───────────────────────────────────────────────
+  const alertsEl  = el('dbStockAlerts');
+  const moversEl  = el('dbTopMovers');
+  if (alertsEl && pfAccounts) {
+    const stale = pfAccounts.flatMap(a =>
+      a.holdings.filter(h => h.currentPrice > 0 && isStale(h)).map(h => ({ acc: a.name, name: h.name }))
+    );
+    alertsEl.innerHTML = stale.length === 0
+      ? '<div style="color:var(--income);font-size:13px">✅ 모든 종목의 현재가가 최신입니다.</div>'
+      : `<div style="color:#d97706;font-size:12px;background:#fef3c7;padding:7px 10px;border-radius:6px">
+           ⚠️ 7일 이상 미갱신 종목: ${stale.map(s=>`<b>${s.name}</b>(${s.acc})`).join(', ')}
+         </div>`;
+  }
+  if (moversEl && pfAccounts) {
+    const rows = pfAccounts.map(acc => {
+      const hs = acc.holdings
+        .map(h => { const c = calcHolding(h); return { name:h.name, pnl:c.evalAmt - c.costAmt }; })
+        .filter(h => h.pnl !== 0);
+      if (!hs.length) return null;
+      hs.sort((a,b) => b.pnl - a.pnl);
+      const best  = hs[0];
+      const worst = hs[hs.length-1];
+      return `<div style="font-size:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <span style="min-width:70px;font-weight:600;color:var(--text-sub)">${acc.name}</span>
+        <span style="color:var(--income)">▲ ${best.name} ${best.pnl>0?'+':''}${fmtAmount(best.pnl)}</span>
+        ${worst !== best ? `<span style="color:var(--expense)">▼ ${worst.name} ${fmtAmount(worst.pnl)}</span>` : ''}
+      </div>`;
+    }).filter(Boolean);
+    moversEl.innerHTML = rows.length ? rows.join('') : '<div style="color:var(--text-muted);font-size:12px">수익/손실 데이터 없음</div>';
+  }
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -1680,20 +1975,9 @@ function renderSimulation() {
     </div>`;
 }
 
-// ── 타임라인 (jsx의 이벤트 로직 참고) ──────────────────────────────
-function renderTimeline() {
-  const now   = new Date();
-  const nowYM = now.getFullYear() * 100 + (now.getMonth()+1);
-
-  function classify(year, month) {
-    const ym = year*100 + (month||1);
-    if (ym < nowYM) return 'past';
-    if (ym <= nowYM + 6) return 'near';  // 6개월 이내
-    if (year <= 2028) return 'future';
-    return 'milestone';
-  }
-
-  const events = [
+// ── 타임라인 이벤트 목록 (대시보드·타임라인 공통 사용) ────────────────
+function getTimelineEvents() {
+  return [
     { year:2027, month:4,  title:'아파트 전세 만기 → 본인 입주',
       desc:'전세퇴거자금대출 4억 실행 (30년 원리금균등, 월 약 191만원). 임차인 퇴거 후 실거주 시작.',
       alert:{type:'warn', text:'⚠️ 아파트 전세보증금(6.6억) 반환 의무 발생'} },
@@ -1722,7 +2006,19 @@ function renderTimeline() {
       desc:'예상 월 수령액 약 190만원. 이 시점부터 연금저축·IRP 인출 부담 크게 감소.',
       alert:{type:'success', text:'✅ 공백기(2031~2042) 종료 — 재무 안정화 완성'} },
   ];
+}
 
+function renderTimeline() {
+  const now   = new Date();
+  const nowYM = now.getFullYear() * 100 + (now.getMonth()+1);
+  function classify(year, month) {
+    const ym = year*100 + (month||1);
+    if (ym < nowYM) return 'past';
+    if (ym <= nowYM + 6) return 'near';
+    if (year <= 2028) return 'future';
+    return 'milestone';
+  }
+  const events = getTimelineEvents();
   document.getElementById('reTimeline').innerHTML = events.map(ev => {
     const cls = classify(ev.year, ev.month||1);
     const dateStr = `${ev.year}년${ev.month ? ' ' + ev.month + '월' : ''}`;
@@ -2673,6 +2969,133 @@ function renderPublicTab() {
 }
 
 // ══════════════════════════════════════════════════════════════════════
+//  AI 포트폴리오 자문
+// ══════════════════════════════════════════════════════════════════════
+const AI_KEY_STORAGE = 'ai_advisor_api_key';
+
+function saveAIKey() {
+  const val = document.getElementById('aiApiKeyInput')?.value || '';
+  if (val) localStorage.setItem(AI_KEY_STORAGE, val);
+}
+function clearAIKey() {
+  localStorage.removeItem(AI_KEY_STORAGE);
+  const inp = document.getElementById('aiApiKeyInput');
+  if (inp) inp.value = '';
+}
+function loadAIKey() {
+  const k = localStorage.getItem(AI_KEY_STORAGE) || '';
+  const inp = document.getElementById('aiApiKeyInput');
+  if (inp && k) inp.value = k;
+  return k;
+}
+
+function buildPortfolioPrompt() {
+  const pa = loadPublicAssets();
+  const { cash, re, pf, sv, total } = calculateTotalAssets();
+
+  // 계좌별 데이터
+  const accounts = (pfAccounts || []).map(acc => {
+    const holdings = acc.holdings.map(h => {
+      const c = calcHolding(h);
+      const pnlPct = c.costAmt > 0 ? ((c.evalAmt - c.costAmt) / c.costAmt * 100).toFixed(1) : '0.0';
+      return { name: h.name, evalAmt: c.evalAmt, costAmt: c.costAmt, pnlPct: `${pnlPct}%`, assetClass: h.assetClass };
+    });
+    return { name: acc.name, monthly: acc.monthly, total: pfAccountTotal(acc), holdings };
+  });
+
+  // 자산군 비중
+  const allHoldings = (pfAccounts || []).flatMap(a => a.holdings);
+  const byClass = {};
+  ASSET_CLASSES.forEach(c => { byClass[c] = 0; });
+  allHoldings.forEach(h => {
+    const c = calcHolding(h);
+    byClass[h.assetClass || '기타'] = (byClass[h.assetClass || '기타'] || 0) + c.evalAmt;
+  });
+  const classRatio = Object.entries(byClass).map(([k,v]) => ({
+    class: k, pct: pf > 0 ? (v / pf * 100).toFixed(1) + '%' : '0%'
+  }));
+
+  return JSON.stringify({
+    사용자정보: { 생년: 1977, 현재나이: new Date().getFullYear() - 1977, 은퇴목표: 2031, 국민연금수령예정: pa.pensionYear || 2042, 예상연금월수령액: fmtAmount(pa.pensionAdjusted || 1901000), 공백기: '2031~' + (pa.pensionYear || 2042) + '년' },
+    순자산현황: { 전체순자산: fmtAmount(total), 부동산: fmtAmount(re), 주식포트폴리오: fmtAmount(pf), 예적금: fmtAmount(sv), 현금성자산: fmtAmount(cash) },
+    포트폴리오: { 계좌별: accounts, 자산군비중: classRatio, 주식비중전체대비: total > 0 ? (pf / total * 100).toFixed(1) + '%' : '0%' }
+  }, null, 2);
+}
+
+async function callAIAdvisor() {
+  const key = loadAIKey();
+  if (!key || !key.startsWith('sk-ant-')) {
+    document.getElementById('aiError').style.display = 'block';
+    document.getElementById('aiError').textContent = '❌ API 키를 입력해주세요. (sk-ant-로 시작하는 Anthropic API 키)';
+    return;
+  }
+
+  const btn = document.getElementById('aiAdviseBtn');
+  const resultEl = document.getElementById('aiResult');
+  const errorEl  = document.getElementById('aiError');
+  errorEl.style.display  = 'none';
+  resultEl.style.display = 'none';
+  btn.disabled   = true;
+  btn.textContent = '⏳ 분석 중... (10~20초 소요)';
+
+  const systemPrompt = `당신은 워런 버핏의 장기 가치투자 원칙과 레이 달리오의 올웨더 포트폴리오 이론을 결합한 전문 자산관리 어드바이저입니다. 한국의 세제(연금저축/IRP/ISA 세액공제, 연 1,500만원 룰, 양도소득세), 부동산 시장, 재개발 절차를 잘 알고 있습니다.
+사용자의 데이터를 분석해서 다음 4가지를 한국어로 답변하세요:
+1. 현재 포트폴리오의 강점과 리스크 (간결하게)
+2. 자산 배분 개선 제안 (은퇴 공백기 2031~2042를 반드시 고려)
+3. 계좌별 종목 배치 최적화 조언 (절세 효율 포함)
+4. 향후 3년 내 우선 실행 액션 3가지
+주의: 이 답변은 참고용 의견이며, 실제 투자 결정은 본인 판단과 전문가 상담을 병행하세요.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1500,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: `아래는 제 자산 현황 데이터입니다. 분석해주세요:\n\n${buildPortfolioPrompt()}` }]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '응답을 파싱할 수 없습니다.';
+
+    // 마크다운 기본 변환
+    const html = text
+      .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+      .replace(/\n\n/g, '<br><br>')
+      .replace(/\n/g, '<br>');
+
+    document.getElementById('aiResultText').innerHTML = html;
+    document.getElementById('aiResultTs').textContent =
+      `생성일시: ${new Date().toLocaleString('ko-KR')} · 모델: claude-sonnet-4-6`;
+    resultEl.style.display = 'block';
+  } catch (e) {
+    const msg = e.message || String(e);
+    errorEl.textContent = msg.includes('401') || msg.includes('authentication')
+      ? '❌ API 키가 올바르지 않습니다. Anthropic Console에서 키를 확인해주세요.'
+      : msg.includes('network') || msg.includes('fetch')
+        ? '❌ 네트워크 오류. 인터넷 연결을 확인해주세요.'
+        : `❌ 오류: ${msg}`;
+    errorEl.style.display = 'block';
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = '🤖 AI 자문 받기';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
 //  초기화
 // ══════════════════════════════════════════════════════════════════════
 function initDaySelect() {
@@ -2690,6 +3113,8 @@ function init() {
   generateRecurringTransactions();
   settleAccumulatedSavings();
   renderTotalAssetBar();
+  renderDashboard();
+  loadAIKey();
 
   document.getElementById('txDate').value     = todayStr();
   document.getElementById('recStartYM').value = todayStr().slice(0,7);
