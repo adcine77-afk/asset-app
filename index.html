@@ -8,28 +8,29 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #f8f9fc;
-    --surface: #ffffff;
-    --border: #e2e8f0;
-    --text: #1e293b;
-    --text-sub: #64748b;
-    --text-muted: #94a3b8;
-    --primary: #3b82f6;
-    --primary-light: #eff6ff;
-    --income: #10b981;
-    --income-light: #ecfdf5;
-    --expense: #ef4444;
-    --expense-light: #fef2f2;
-    --recurring: #8b5cf6;
-    --recurring-light: #f5f3ff;
-    --re: #ec4899;
-    --re-light: #fdf2f8;
-    --re2: #a855f7;
-    --loan: #f97316;
-    --loan-light: #fff7ed;
-    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --bg: #faf7f2;
+    --surface: #fffdf9;
+    --border: #ede7dd;
+    --text: #3a3229;
+    --text-sub: #8a7f6f;
+    --text-muted: #b0a595;
+    --primary: #d97757;
+    --primary-light: #fdf0ea;
+    --income: #7c9473;
+    --income-light: #f2f5ee;
+    --expense: #d97757;
+    --expense-light: #fdf0ea;
+    --recurring: #c9a86a;
+    --recurring-light: #fbf4e6;
+    --re: #a8927a;
+    --re-light: #f7f2eb;
+    --re2: #b98a5e;
+    --loan: #c9744f;
+    --loan-light: #fbeee7;
+    --shadow: 0 1px 3px rgba(58,50,41,.06), 0 1px 2px rgba(58,50,41,.04);
     --radius: 12px;
     --radius-sm: 8px;
+    --bottom-nav-h: 64px;
   }
 
   body {
@@ -72,6 +73,33 @@
   .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
   .tab-btn.re-tab.active { color: var(--re); border-bottom-color: var(--re); }
 
+  /* ─── 하단 탭바 (모바일 전용) ─── */
+  .bottom-tab-nav {
+    display: none;
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 150;
+    background: var(--surface); border-top: 1px solid var(--border);
+    box-shadow: 0 -2px 10px rgba(58,50,41,.06);
+    padding: 4px 2px calc(4px + env(safe-area-inset-bottom));
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+  }
+  .bottom-tab-inner { display: flex; min-width: max-content; width: 100%; }
+  .bottom-tab-btn {
+    flex: 1 0 68px; min-width: 68px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 6px 4px; border: none; background: none; cursor: pointer;
+    font-family: inherit; color: var(--text-muted); transition: color .15s;
+  }
+  .bottom-tab-btn .bt-icon { font-size: 20px; line-height: 1; }
+  .bottom-tab-btn .bt-label { font-size: 10px; font-weight: 600; }
+  .bottom-tab-btn.active { color: var(--primary); }
+  .bottom-tab-btn.active.re-tab { color: var(--re); }
+
+  @media (max-width: 768px) {
+    header .tab-nav { display: none; }
+    .bottom-tab-nav { display: block; }
+    body { padding-bottom: var(--bottom-nav-h); }
+  }
+
   /* ─── 메인 ─── */
   main { max-width: 960px; margin: 0 auto; padding: 24px 16px; display: grid; gap: 20px; }
 
@@ -88,6 +116,12 @@
     width: 28px; height: 28px; border-radius: 8px;
     display: flex; align-items: center; justify-content: center; font-size: 14px;
   }
+  .card-mini {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 16px; box-shadow: none;
+    transition: border-color .15s;
+  }
+  .card-mini:hover { border-color: var(--primary); }
 
   /* ─── 월 네비게이션 ─── */
   .month-nav { display: flex; align-items: center; gap: 12px; justify-content: center; }
@@ -125,7 +159,7 @@
     transition: border-color .15s, box-shadow .15s; outline: none; width: 100%;
   }
   input:focus, select:focus, textarea:focus {
-    border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,.1);
+    border-color: var(--primary); box-shadow: 0 0 0 3px rgba(217,119,87,.12);
   }
   .type-toggle { display: flex; gap: 8px; margin-bottom: 12px; }
   .type-btn {
@@ -210,7 +244,7 @@
 
   /* ─── 공지 ─── */
   .notice { background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius-sm); padding: 10px 14px; font-size: 12px; color: #92400e; display: flex; align-items: center; gap: 8px; }
-  .notice.blue { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+  .notice.blue { background: #fdf0ea; border-color: #f0dcc9; color: #8a5a34; }
   .notice.pink { background: var(--re-light); border-color: #fbcfe8; color: #9d174d; }
 
   /* ─── 모달 ─── */
@@ -224,7 +258,7 @@
   .modal-btns button { flex: 1; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); cursor: pointer; font-size: 13px; font-weight: 600; background: var(--bg); color: var(--text); transition: all .15s; min-width: 120px; }
   .modal-btns button.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
   .modal-btns button.purple { background: var(--recurring); color: #fff; border-color: var(--recurring); }
-  .modal-btns button:hover:not(.primary):not(.purple) { background: #f1f5f9; }
+  .modal-btns button:hover:not(.primary):not(.purple) { background: #f7f2eb; }
 
   /* ════════════════════════════════════════
      부동산 탭 전용 스타일
@@ -354,7 +388,7 @@
   .tl-desc { font-size: 12px; color: var(--text-sub); margin-top: 3px; line-height: 1.5; }
   .tl-alert { display: inline-flex; align-items: center; gap: 4px; margin-top: 5px; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
   .tl-alert.warn { background: #fef3c7; color: #92400e; }
-  .tl-alert.info { background: var(--primary-light); color: #1d4ed8; }
+  .tl-alert.info { background: var(--primary-light); color: #8a5a34; }
   .tl-alert.success { background: var(--income-light); color: #065f46; }
 
   /* ════════════════════════════════════════
@@ -410,8 +444,8 @@
   .h-del-btn:hover { color:var(--expense); background:var(--expense-light); }
 
   .asset-badge { display:inline-flex; padding:2px 7px; border-radius:12px; font-size:10px; font-weight:700; white-space:nowrap; }
-  .asset-badge.국내주식 { background:#eff6ff; color:#1d4ed8; }
-  .asset-badge.해외주식 { background:#f5f3ff; color:#6d28d9; }
+  .asset-badge.국내주식 { background:#fdf0ea; color:#8a5a34; }
+  .asset-badge.해외주식 { background:#fbf4e6; color:#a8763f; }
   .asset-badge.채권 { background:#fffbeb; color:#92400e; }
   .asset-badge.현금성 { background:var(--income-light); color:#065f46; }
 
@@ -423,25 +457,25 @@
   .pf-refresh-btn { flex-shrink:0; padding:8px 16px; background:var(--primary); color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:13px; font-weight:600; white-space:nowrap; transition:opacity .15s; }
   .pf-refresh-btn:hover { opacity:.85; }
   .pf-refresh-btn:disabled { opacity:.5; cursor:not-allowed; }
-  .price-source-tag { font-size:10px; color:#059669; background:#d1fae5; padding:1px 5px; border-radius:3px; margin-left:4px; }
+  .price-source-tag { font-size:10px; color:#6b8a5f; background:#d1fae5; padding:1px 5px; border-radius:3px; margin-left:4px; }
 
-  .tax-tip-card { background:linear-gradient(135deg,#eff6ff,#f0fdf4); border:1px solid #bfdbfe; border-radius:var(--radius); padding:18px 20px; }
+  .tax-tip-card { background:linear-gradient(135deg,#fdf0ea,#f0fdf4); border:1px solid #f0dcc9; border-radius:var(--radius); padding:18px 20px; }
   .tax-tip-title { font-size:14px; font-weight:700; color:var(--primary); margin-bottom:10px; }
   .tax-tip-body { font-size:13px; color:var(--text); line-height:1.8; }
   .tax-tip-body b { color:var(--income); }
 
   /* ── 통합 자산 요약 바 ── */
-  .total-asset-bar { position:sticky; top:100px; z-index:50; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.09); border-bottom:1px solid var(--border); overflow:hidden; }
+  .total-asset-bar { position:sticky; top:100px; z-index:50; background:var(--surface); box-shadow:0 2px 8px rgba(58,50,41,.08); border-bottom:1px solid var(--border); overflow:hidden; }
   .ta-collapsed { display:flex; align-items:center; justify-content:space-between; padding:10px 18px; cursor:pointer; user-select:none; gap:8px; }
-  .ta-collapsed:hover { background:#f8fafc; }
+  .ta-collapsed:hover { background:var(--bg); }
   .ta-left { display:flex; align-items:center; gap:10px; flex-wrap:wrap; min-width:0; }
   .ta-icon { font-size:16px; flex-shrink:0; }
   #taSummaryText { font-size:14px; font-weight:700; color:var(--primary); white-space:nowrap; }
   .ta-breakdown-pills { display:flex; gap:5px; flex-wrap:wrap; }
   .ta-pill { font-size:11px; padding:2px 8px; border-radius:10px; font-weight:600; }
   .ta-pill.re   { background:#fef2f2; color:var(--re); }
-  .ta-pill.pf   { background:#f0fdf4; color:#059669; }
-  .ta-pill.cash { background:#eff6ff; color:var(--primary); }
+  .ta-pill.pf   { background:#f0fdf4; color:#6b8a5f; }
+  .ta-pill.cash { background:#fdf0ea; color:var(--primary); }
   .ta-chevron { font-size:11px; color:var(--text-muted); transition:transform .2s; flex-shrink:0; }
   .ta-chevron.open { transform:rotate(180deg); }
   .ta-detail { padding:0 18px 14px; border-top:1px solid var(--border); }
@@ -449,15 +483,15 @@
   .ta-detail-item { padding:12px; border-radius:8px; }
   .ta-detail-item.re-item   { background:#fef2f2; }
   .ta-detail-item.pf-item   { background:#f0fdf4; }
-  .ta-detail-item.cash-item { background:#eff6ff; }
+  .ta-detail-item.cash-item { background:#fdf0ea; }
   .ta-di-label { font-size:11px; color:var(--text-muted); margin-bottom:4px; }
   .ta-di-value { font-size:15px; font-weight:700; }
   .ta-di-sub   { font-size:11px; color:var(--text-muted); margin-top:2px; }
   .ta-savings-row { display:flex; align-items:center; gap:10px; margin-top:12px; flex-wrap:wrap; }
   .ta-public-section { margin-top:14px; padding-top:12px; border-top:1px solid var(--border); }
-  .ta-public-title { font-size:13px; font-weight:700; color:#7c3aed; margin-bottom:10px; }
+  .ta-public-title { font-size:13px; font-weight:700; color:#a8763f; margin-bottom:10px; }
   .ta-public-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-  .ta-public-item { background:#faf5ff; border:1px solid #e9d5ff; border-radius:8px; padding:12px; }
+  .ta-public-item { background:#f7f2eb; border:1px solid #e8ddc7; border-radius:8px; padding:12px; }
   @media(max-width:600px) { .ta-public-grid { grid-template-columns:1fr; } }
   @media(max-width:600px) { .ta-detail-grid { grid-template-columns:1fr; } #taSummaryText { font-size:13px; } }
 
@@ -477,14 +511,41 @@
     <div style="font-size:12px; color:var(--text-muted)" id="headerSub">가계부</div>
   </div>
   <div class="tab-nav">
-    <button class="tab-btn active" id="tabBtnDashboard" onclick="switchTab('dashboard')">📊 대시보드</button>
-    <button class="tab-btn" id="tabBtnLedger" onclick="switchTab('ledger')">📒 가계부</button>
-    <button class="tab-btn re-tab" id="tabBtnRE" onclick="switchTab('re')">🏠 부동산</button>
-    <button class="tab-btn" id="tabBtnPF" onclick="switchTab('pf')">📈 주식</button>
-    <button class="tab-btn" id="tabBtnSavings" onclick="switchTab('savings')">🏦 예적금</button>
-    <button class="tab-btn" id="tabBtnPublic" onclick="switchTab('public')">🏛️ 공적자산</button>
+    <button class="tab-btn active" id="tabBtnDashboard" data-tab="dashboard" onclick="switchTab('dashboard')">📊 대시보드</button>
+    <button class="tab-btn" id="tabBtnLedger" data-tab="ledger" onclick="switchTab('ledger')">📒 가계부</button>
+    <button class="tab-btn re-tab" id="tabBtnRE" data-tab="re" onclick="switchTab('re')">🏠 부동산</button>
+    <button class="tab-btn" id="tabBtnPF" data-tab="pf" onclick="switchTab('pf')">📈 주식</button>
+    <button class="tab-btn" id="tabBtnSavings" data-tab="savings" onclick="switchTab('savings')">🏦 예적금</button>
+    <button class="tab-btn" id="tabBtnPublic" data-tab="public" onclick="switchTab('public')">🏛️ 공적자산</button>
   </div>
 </header>
+
+<!-- 하단 탭바 (모바일 전용, 768px 이하에서만 표시) -->
+<nav class="bottom-tab-nav">
+  <div class="bottom-tab-inner">
+    <button class="bottom-tab-btn active" data-tab="dashboard" onclick="switchTab('dashboard')">
+      <span class="bt-icon">🏠</span><span class="bt-label">홈</span>
+    </button>
+    <button class="bottom-tab-btn" data-tab="pf" onclick="switchTab('pf')">
+      <span class="bt-icon">📈</span><span class="bt-label">주식</span>
+    </button>
+    <button class="bottom-tab-btn re-tab" data-tab="re" onclick="switchTab('re')">
+      <span class="bt-icon">🏘️</span><span class="bt-label">부동산</span>
+    </button>
+    <button class="bottom-tab-btn" data-tab="ledger" onclick="switchTab('ledger')">
+      <span class="bt-icon">📒</span><span class="bt-label">가계부</span>
+    </button>
+    <button class="bottom-tab-btn" data-tab="pf" onclick="goToAIAdvisor()">
+      <span class="bt-icon">🤖</span><span class="bt-label">AI자문</span>
+    </button>
+    <button class="bottom-tab-btn" data-tab="savings" onclick="switchTab('savings')">
+      <span class="bt-icon">🏦</span><span class="bt-label">예적금</span>
+    </button>
+    <button class="bottom-tab-btn" data-tab="public" onclick="switchTab('public')">
+      <span class="bt-icon">🏛️</span><span class="bt-label">공적자산</span>
+    </button>
+  </div>
+</nav>
 
 <!-- ══════════════════════════════════════════════════════════
      통합 자산 요약 바 (모든 탭 공통 — header 바로 아래 sticky)
@@ -510,9 +571,9 @@
         <div class="ta-di-value" id="taPfVal">—</div>
         <div class="ta-di-sub" id="taPfSub">—</div>
       </div>
-      <div class="ta-detail-item" style="background:#f0fdf4;border-left:3px solid #059669">
+      <div class="ta-detail-item" style="background:#f0fdf4;border-left:3px solid #6b8a5f">
         <div class="ta-di-label">🏦 예적금</div>
-        <div class="ta-di-value" id="taSvVal" style="color:#059669">—</div>
+        <div class="ta-di-value" id="taSvVal" style="color:#6b8a5f">—</div>
         <div class="ta-di-sub" id="taSvSub">—</div>
       </div>
       <div class="ta-detail-item cash-item">
@@ -527,12 +588,12 @@
       <div class="ta-public-grid">
         <div class="ta-public-item">
           <div class="ta-di-label">국민연금 예상 월 수령액</div>
-          <div class="ta-di-value" id="taBarPensionDisp" style="color:#7c3aed">—</div>
+          <div class="ta-di-value" id="taBarPensionDisp" style="color:#a8763f">—</div>
           <div class="ta-di-sub" id="taBarPensionSub" style="font-size:11px;color:var(--text-muted)">—</div>
         </div>
         <div class="ta-public-item">
           <div class="ta-di-label">퇴직금 예상액 (IRP 이전)</div>
-          <div class="ta-di-value" id="taBarRetireDisp" style="color:#0369a1">—</div>
+          <div class="ta-di-value" id="taBarRetireDisp" style="color:#8a6a4a">—</div>
           <div class="ta-di-sub" id="taBarRetireSub" style="font-size:11px;color:var(--text-muted)">—</div>
         </div>
         <div class="ta-public-item" style="background:#f0fdf4">
@@ -559,36 +620,40 @@
 ══════════════════════════════════════════════════════════ -->
 <div id="tabDashboard">
   <!-- 섹션 1: 순자산 히어로 -->
-  <div id="dbHero" style="background:linear-gradient(135deg,#1e3a5f 0%,#2d6a9f 50%,#1a5276 100%);border-radius:var(--radius);padding:24px 20px 20px;color:#fff;margin-bottom:0">
-    <div style="font-size:12px;opacity:.75;margin-bottom:6px;letter-spacing:.5px">전체 순자산</div>
-    <div style="font-size:32px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px" id="dbTotalAmt">계산 중...</div>
-    <div style="font-size:13px;opacity:.8;margin-bottom:18px" id="dbMonthDelta">—</div>
-    <div style="background:rgba(255,255,255,.15);border-radius:6px;height:8px;overflow:hidden">
-      <div id="dbAssetBar" style="height:100%;display:flex"></div>
+  <div id="dbHero" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 20px;box-shadow:var(--shadow);margin-bottom:0">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:20px;flex-wrap:wrap;gap:4px">
+      <div style="font-size:15px;font-weight:700;color:var(--text)">안녕하세요, 미라님</div>
+      <div style="font-size:12px;color:var(--text-muted)" id="dbHeroDate">—</div>
     </div>
-    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:11px;opacity:.85" id="dbAssetLegend"></div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;letter-spacing:.3px">전체 순자산</div>
+    <div style="font-size:34px;font-weight:800;letter-spacing:-.5px;color:var(--text);margin-bottom:12px" id="dbTotalAmt">계산 중...</div>
+    <div style="background:var(--bg);border-radius:6px;height:6px;overflow:hidden">
+      <div id="dbAssetBar" style="height:100%;border-radius:6px;transition:width .3s;width:0%"></div>
+    </div>
+    <div style="font-size:12px;color:var(--text-sub);margin-top:8px;margin-bottom:18px" id="dbMonthDelta">—</div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center" id="dbAssetLegend"></div>
   </div>
 
   <!-- 섹션 2: 자산 구성 2×2 그리드 -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" id="dbAssetGrid">
-    <div class="card" style="cursor:pointer;margin:0" onclick="switchTab('re')">
+    <div class="card-mini" style="cursor:pointer" onclick="switchTab('re')">
       <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">🏠 부동산 순자산</div>
       <div style="font-size:20px;font-weight:700;color:var(--re)" id="dbReVal">—</div>
       <div style="font-size:11px;color:var(--text-muted);margin-top:3px" id="dbReSub">—</div>
     </div>
-    <div class="card" style="cursor:pointer;margin:0" onclick="switchTab('pf')">
+    <div class="card-mini" style="cursor:pointer" onclick="switchTab('pf')">
       <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">📈 주식 포트폴리오</div>
-      <div style="font-size:20px;font-weight:700;color:#6d28d9" id="dbPfVal">—</div>
+      <div style="font-size:20px;font-weight:700;color:var(--primary)" id="dbPfVal">—</div>
       <div style="font-size:11px;color:var(--text-muted);margin-top:3px" id="dbPfSub">—</div>
     </div>
-    <div class="card" style="cursor:pointer;margin:0" onclick="switchTab('savings')">
+    <div class="card-mini" style="cursor:pointer" onclick="switchTab('savings')">
       <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">🏦 예적금</div>
-      <div style="font-size:20px;font-weight:700;color:#059669" id="dbSvVal">—</div>
+      <div style="font-size:20px;font-weight:700;color:var(--income)" id="dbSvVal">—</div>
       <div style="font-size:11px;color:var(--text-muted);margin-top:3px" id="dbSvSub">—</div>
     </div>
-    <div class="card" style="cursor:pointer;margin:0" onclick="switchTab('ledger')">
+    <div class="card-mini" style="cursor:pointer" onclick="switchTab('ledger')">
       <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">💵 현금성 자산</div>
-      <div style="font-size:20px;font-weight:700;color:#0369a1" id="dbCashVal">—</div>
+      <div style="font-size:20px;font-weight:700;color:var(--recurring)" id="dbCashVal">—</div>
       <div style="font-size:11px;color:var(--text-muted);margin-top:3px" id="dbCashSub">—</div>
     </div>
   </div>
@@ -616,7 +681,7 @@
              style="width:60px;padding:4px 7px;border:1px solid var(--border);border-radius:5px;font-size:12px;font-family:inherit"
              oninput="localStorage.setItem('db_savings_goal_pct', this.value); renderDashboard()">
       <span style="font-size:12px;color:var(--text-muted)">%</span>
-      <div style="flex:1;min-width:120px;background:#e2e8f0;border-radius:4px;height:8px;overflow:hidden">
+      <div style="flex:1;min-width:120px;background:#ede7dd;border-radius:4px;height:8px;overflow:hidden">
         <div id="dbGoalBar" style="height:100%;background:var(--income);border-radius:4px;transition:width .3s;width:0%"></div>
       </div>
       <span style="font-size:12px;font-weight:600" id="dbGoalLabel"></span>
@@ -637,7 +702,7 @@
 
   <!-- 섹션 6: 알림 -->
   <div class="card">
-    <div class="card-title"><div class="icon" style="background:#f5f3ff">🔔</div>알림</div>
+    <div class="card-title"><div class="icon" style="background:#fbf4e6">🔔</div>알림</div>
     <div style="font-size:12px;font-weight:700;color:var(--re);margin-bottom:6px">🏠 부동산 시세</div>
     <div id="dbREAlerts" style="margin-bottom:10px"></div>
     <div style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:6px">📈 주식 <a href="#" onclick="switchTab('pf');return false" style="font-size:11px;font-weight:400;color:var(--primary);margin-left:4px">주식 탭에서 업데이트 →</a></div>
@@ -649,8 +714,8 @@
   </div>
 
   <!-- ── AI 종합자산 자문 ─────────────────────────────────────────────── -->
-  <div class="card" style="border:1.5px solid #c4b5fd">
-    <div class="card-title"><div class="icon" style="background:#f5f3ff">🏛️</div>AI 종합자산 자문 — 은퇴 공백기(2031~2042) 관점
+  <div class="card" style="border:1.5px solid #e6d2b5">
+    <div class="card-title"><div class="icon" style="background:#fbf4e6">🏛️</div>AI 종합자산 자문 — 은퇴 공백기(2031~2042) 관점
       <span style="font-size:11px;font-weight:400;color:var(--text-muted);margin-left:6px">Claude API · 참고용</span>
     </div>
 
@@ -663,7 +728,7 @@
       <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px">Anthropic API 키 (sk-ant-로 시작)</div>
       <div style="display:flex;gap:8px;align-items:center">
         <input type="password" id="aiApiKeyInputTotal" placeholder="sk-ant-api03-..."
-               style="flex:1;padding:7px 10px;border:1px solid #c4b5fd;border-radius:6px;font-size:13px;font-family:inherit"
+               style="flex:1;padding:7px 10px;border:1px solid #e6d2b5;border-radius:6px;font-size:13px;font-family:inherit"
                oninput="saveAIKey('aiApiKeyInputTotal')">
         <button onclick="clearAIKey()" style="padding:7px 12px;border:1px solid var(--border);border-radius:6px;background:none;cursor:pointer;font-size:12px;color:var(--text-muted)">삭제</button>
       </div>
@@ -674,21 +739,21 @@
 
     <!-- 자문 버튼 -->
     <button id="aiAdviseBtnTotal" onclick="callAIAdvisor('total')"
-            style="width:100%;padding:11px;background:linear-gradient(135deg,#6d28d9,#4f46e5);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s">
+            style="width:100%;padding:11px;background:linear-gradient(135deg,#a8763f,#d97757);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s">
       🤖 종합자산 자문 받기
     </button>
 
     <!-- 결과 영역 -->
     <div id="aiResultTotal" style="display:none;margin-top:16px">
-      <div style="background:#f5f3ff;border:1px solid #c4b5fd;border-radius:8px;padding:16px">
-        <span id="aiResultModeBadgeTotal" style="display:inline-block;font-size:11px;font-weight:700;color:#6d28d9;background:#ede9fe;padding:3px 9px;border-radius:20px;margin-bottom:10px"></span>
+      <div style="background:#fbf4e6;border:1px solid #e6d2b5;border-radius:8px;padding:16px">
+        <span id="aiResultModeBadgeTotal" style="display:inline-block;font-size:11px;font-weight:700;color:#a8763f;background:#f3e6cf;padding:3px 9px;border-radius:20px;margin-bottom:10px"></span>
         <div style="font-size:13px;line-height:1.9;color:var(--text)" id="aiResultTextTotal"></div>
         <div style="font-size:11px;color:var(--text-muted);margin-top:10px;padding-top:8px;border-top:1px solid #ddd6fe" id="aiResultTsTotal"></div>
       </div>
       <div style="font-size:11px;color:#92400e;background:#fef3c7;padding:8px 10px;border-radius:6px;margin-top:8px;line-height:1.6">
         ⚠️ 본 AI 자문은 참고용입니다. Claude API를 통해 생성된 의견이며, 실제 투자 결정은 본인 판단과 공인 전문가 상담을 병행하시기 바랍니다. 과거 수익률이 미래를 보장하지 않습니다.
       </div>
-      <button onclick="callAIAdvisor('total')" style="margin-top:10px;padding:8px 16px;border:1px solid #c4b5fd;border-radius:6px;background:none;cursor:pointer;font-size:13px;color:#6d28d9;font-weight:600">🔄 다시 분석</button>
+      <button onclick="callAIAdvisor('total')" style="margin-top:10px;padding:8px 16px;border:1px solid #e6d2b5;border-radius:6px;background:none;cursor:pointer;font-size:13px;color:#a8763f;font-weight:600">🔄 다시 분석</button>
     </div>
 
     <!-- 에러 영역 -->
@@ -708,7 +773,7 @@
   </div>
 
   <div class="card">
-    <div class="card-title"><div class="icon" style="background:#eff6ff">📊</div>월간 요약</div>
+    <div class="card-title"><div class="icon" style="background:#fdf0ea">📊</div>월간 요약</div>
     <div class="summary-grid">
       <div class="summary-item income"><div class="s-label">총 수입</div><div class="s-value" id="sumIncome">0원</div></div>
       <div class="summary-item expense"><div class="s-label">총 지출</div><div class="s-value" id="sumExpense">0원</div></div>
@@ -779,7 +844,7 @@
 
   <div class="card">
     <div class="card-title">
-      <div class="icon" style="background:#faf5ff">📋</div>
+      <div class="icon" style="background:#f7f2eb">📋</div>
       거래 내역
       <span style="margin-left:auto;font-size:12px;font-weight:400;color:var(--text-muted)" id="txCount"></span>
     </div>
@@ -974,7 +1039,7 @@
         <div style="font-size:11px;color:var(--text-muted);margin-bottom:5px">GitHub prices.json Raw URL — GitHub 저장소 설정 후 아래에 입력하세요</div>
         <input id="pfGithubUrl" type="text"
                placeholder="https://raw.githubusercontent.com/사용자명/저장소명/main/prices.json"
-               style="width:100%;box-sizing:border-box;padding:7px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;font-family:inherit"
+               style="width:100%;box-sizing:border-box;padding:7px 10px;border:1px solid #ede7dd;border-radius:6px;font-size:12px;font-family:inherit"
                oninput="localStorage.setItem('pf_github_raw_url',this.value)">
       </div>
       <button class="pf-refresh-btn" onclick="fetchLatestPrices()">📥 최신 시세로 갱신</button>
@@ -984,11 +1049,11 @@
 
   <!-- 요약 대시보드 -->
   <div class="card">
-    <div class="card-title"><div class="icon" style="background:#eff6ff">📊</div>포트폴리오 현황</div>
+    <div class="card-title"><div class="icon" style="background:#fdf0ea">📊</div>포트폴리오 현황</div>
     <div class="pf-summary-grid">
-      <div class="pf-summary-item" style="background:#f5f3ff">
+      <div class="pf-summary-item" style="background:#fbf4e6">
         <div class="s-label">총 평가금액</div>
-        <div class="s-value" style="color:#6d28d9" id="pfTotalVal">—</div>
+        <div class="s-value" style="color:#a8763f" id="pfTotalVal">—</div>
       </div>
       <div class="pf-summary-item" style="background:var(--bg)">
         <div class="s-label">총 평가손익</div>
@@ -1020,7 +1085,7 @@
   <!-- 계좌 추가 버튼 -->
   <div style="display:flex;gap:10px;margin-top:4px">
     <button class="pf-add-acc-btn" style="flex:1" onclick="pfAddAccount('me')">+ 본인 계좌 추가</button>
-    <button class="pf-add-acc-btn" style="flex:1;background:#ecfdf5;color:#059669;border-color:#6ee7b7" onclick="pfAddAccount('child')">+ 자녀 계좌 추가</button>
+    <button class="pf-add-acc-btn" style="flex:1;background:#ecfdf5;color:#6b8a5f;border-color:#6ee7b7" onclick="pfAddAccount('child')">+ 자녀 계좌 추가</button>
   </div>
 
   <!-- 절세 팁 -->
@@ -1037,8 +1102,8 @@
   <div class="notice">ℹ️ prices.json에 없는 종목은 기존 수동 입력값을 그대로 유지합니다. "최신 시세로 갱신" 버튼을 눌러야만 업데이트되며, 자동으로 덮어쓰지 않습니다.</div>
 
   <!-- ── AI 주식 포트폴리오 자문 ──────────────────────────────────────── -->
-  <div class="card" style="border:1.5px solid #c4b5fd">
-    <div class="card-title"><div class="icon" style="background:#f5f3ff">🤖</div>AI 주식 포트폴리오 자문 (버핏·달리오·우드·린치 4인 관점)
+  <div class="card" style="border:1.5px solid #e6d2b5">
+    <div class="card-title"><div class="icon" style="background:#fbf4e6">🤖</div>AI 주식 포트폴리오 자문 (버핏·달리오·우드·린치 4인 관점)
       <span style="font-size:11px;font-weight:400;color:var(--text-muted);margin-left:6px">Claude API · 참고용</span>
     </div>
 
@@ -1052,7 +1117,7 @@
       <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px">Anthropic API 키 (sk-ant-로 시작)</div>
       <div style="display:flex;gap:8px;align-items:center">
         <input type="password" id="aiApiKeyInputStock" placeholder="sk-ant-api03-..."
-               style="flex:1;padding:7px 10px;border:1px solid #c4b5fd;border-radius:6px;font-size:13px;font-family:inherit"
+               style="flex:1;padding:7px 10px;border:1px solid #e6d2b5;border-radius:6px;font-size:13px;font-family:inherit"
                oninput="saveAIKey('aiApiKeyInputStock')">
         <button onclick="clearAIKey()" style="padding:7px 12px;border:1px solid var(--border);border-radius:6px;background:none;cursor:pointer;font-size:12px;color:var(--text-muted)">삭제</button>
       </div>
@@ -1063,21 +1128,21 @@
 
     <!-- 자문 버튼 -->
     <button id="aiAdviseBtnStock" onclick="callAIAdvisor('stock')"
-            style="width:100%;padding:11px;background:linear-gradient(135deg,#6d28d9,#4f46e5);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s">
+            style="width:100%;padding:11px;background:linear-gradient(135deg,#a8763f,#d97757);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s">
       🤖 AI 자문 받기
     </button>
 
     <!-- 결과 영역 -->
     <div id="aiResultStock" style="display:none;margin-top:16px">
-      <div style="background:#f5f3ff;border:1px solid #c4b5fd;border-radius:8px;padding:16px">
-        <span id="aiResultModeBadgeStock" style="display:inline-block;font-size:11px;font-weight:700;color:#6d28d9;background:#ede9fe;padding:3px 9px;border-radius:20px;margin-bottom:10px"></span>
+      <div style="background:#fbf4e6;border:1px solid #e6d2b5;border-radius:8px;padding:16px">
+        <span id="aiResultModeBadgeStock" style="display:inline-block;font-size:11px;font-weight:700;color:#a8763f;background:#f3e6cf;padding:3px 9px;border-radius:20px;margin-bottom:10px"></span>
         <div style="font-size:13px;line-height:1.9;color:var(--text)" id="aiResultTextStock"></div>
         <div style="font-size:11px;color:var(--text-muted);margin-top:10px;padding-top:8px;border-top:1px solid #ddd6fe" id="aiResultTsStock"></div>
       </div>
       <div style="font-size:11px;color:#92400e;background:#fef3c7;padding:8px 10px;border-radius:6px;margin-top:8px;line-height:1.6">
         ⚠️ 본 AI 자문은 참고용입니다. Claude API를 통해 생성된 의견이며, 실제 투자 결정은 본인 판단과 공인 전문가 상담을 병행하시기 바랍니다. 과거 수익률이 미래를 보장하지 않습니다.
       </div>
-      <button onclick="callAIAdvisor('stock')" style="margin-top:10px;padding:8px 16px;border:1px solid #c4b5fd;border-radius:6px;background:none;cursor:pointer;font-size:13px;color:#6d28d9;font-weight:600">🔄 다시 분석</button>
+      <button onclick="callAIAdvisor('stock')" style="margin-top:10px;padding:8px 16px;border:1px solid #e6d2b5;border-radius:6px;background:none;cursor:pointer;font-size:13px;color:#a8763f;font-weight:600">🔄 다시 분석</button>
     </div>
 
     <!-- 에러 영역 -->
@@ -1113,7 +1178,7 @@
     <div id="svList"></div>
     <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;align-items:center">
       <span style="font-size:13px;font-weight:600;color:var(--text)">합계</span>
-      <span style="font-size:16px;font-weight:700;color:#059669" id="svTotal">—</span>
+      <span style="font-size:16px;font-weight:700;color:#6b8a5f" id="svTotal">—</span>
     </div>
   </div>
   <div class="notice">ℹ️ 가계부의 누적저축(현금성 자산)과 별도로 관리됩니다. 중복 입력에 주의하세요.</div>
@@ -1124,7 +1189,7 @@
 ══════════════════════════════════════════════════════════ -->
 <div id="tabPublic" style="display:none">
   <div class="card">
-    <div class="card-title"><div class="icon" style="background:#f5f3ff">🏛️</div>국민연금 예상 수령액</div>
+    <div class="card-title"><div class="icon" style="background:#fbf4e6">🏛️</div>국민연금 예상 수령액</div>
     <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">
       기준값 고정 (내연금.kr 조회 결과): 기준 수령액 190만1천원 · 현재 납부 291개월 · 만 60세까지 425개월<br>
       연금 수령 연도를 변경하면 실제 납부 기간에 비례해 수령액이 자동 계산됩니다.
@@ -1136,9 +1201,9 @@
              oninput="calcPension()">
       <span style="font-size:13px;color:var(--text-muted)">년부터 수령</span>
     </div>
-    <div style="background:#f5f3ff;border-radius:8px;padding:14px 16px">
+    <div style="background:#fbf4e6;border-radius:8px;padding:14px 16px">
       <div style="font-size:12px;color:#6b21a8;margin-bottom:2px">예상 월 수령액</div>
-      <div style="font-size:22px;font-weight:700;color:#7c3aed" id="taPensionDisp">—</div>
+      <div style="font-size:22px;font-weight:700;color:#a8763f" id="taPensionDisp">—</div>
       <div style="font-size:12px;color:var(--text-muted);margin-top:4px;line-height:1.7" id="taPensionSub">—</div>
     </div>
     <div style="font-size:11px;color:#92400e;background:#fef3c7;padding:8px 10px;border-radius:6px;margin-top:10px">
@@ -1147,7 +1212,7 @@
   </div>
 
   <div class="card">
-    <div class="card-title"><div class="icon" style="background:#eff6ff">💼</div>퇴직금 예상액</div>
+    <div class="card-title"><div class="icon" style="background:#fdf0ea">💼</div>퇴직금 예상액</div>
     <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">
       근로기준법 공식: 1일 평균임금 × 30일 × (재직일수 ÷ 365). IRP 이전 예정.
     </div>
@@ -1172,9 +1237,9 @@
       </div>
       <div style="font-size:11px;color:var(--text-muted)">※ 세전 기준. 퇴직소득세 별도. 상여 포함 월 평균으로 입력하세요.</div>
     </div>
-    <div style="background:#eff6ff;border-radius:8px;padding:14px 16px">
+    <div style="background:#fdf0ea;border-radius:8px;padding:14px 16px">
       <div style="font-size:12px;color:#1e40af;margin-bottom:2px">예상 퇴직금 (IRP 이전)</div>
-      <div style="font-size:22px;font-weight:700;color:#0369a1" id="taRetireDisp">—</div>
+      <div style="font-size:22px;font-weight:700;color:#8a6a4a" id="taRetireDisp">—</div>
       <div style="font-size:12px;color:var(--text-muted);margin-top:4px" id="taRetireSub">월 평균임금을 입력하면 자동 계산</div>
     </div>
   </div>
@@ -1249,12 +1314,9 @@ function switchTab(tab) {
   document.getElementById('tabPortfolio').style.display = tab === 'pf'       ? 'contents' : 'none';
   document.getElementById('tabSavings').style.display   = tab === 'savings'  ? 'contents' : 'none';
   document.getElementById('tabPublic').style.display    = tab === 'public'   ? 'contents' : 'none';
-  document.getElementById('tabBtnDashboard').classList.toggle('active', tab === 'dashboard');
-  document.getElementById('tabBtnLedger').classList.toggle('active',    tab === 'ledger');
-  document.getElementById('tabBtnRE').classList.toggle('active',        tab === 're');
-  document.getElementById('tabBtnPF').classList.toggle('active',        tab === 'pf');
-  document.getElementById('tabBtnSavings').classList.toggle('active',   tab === 'savings');
-  document.getElementById('tabBtnPublic').classList.toggle('active',    tab === 'public');
+  document.querySelectorAll('[data-tab]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tab);
+  });
   const labels = { dashboard:'대시보드', ledger:'가계부', re:'부동산', pf:'주식', savings:'예적금', public:'공적자산' };
   document.getElementById('headerSub').textContent = labels[tab] || '';
   if (tab === 'dashboard') renderDashboard();
@@ -1263,6 +1325,14 @@ function switchTab(tab) {
   if (tab === 'savings') renderSavingsTab();
   if (tab === 'public') renderPublicTab();
   renderTotalAssetBar();
+}
+
+function goToAIAdvisor() {
+  switchTab('pf');
+  setTimeout(() => {
+    const el = document.getElementById('aiApiKeyInputStock');
+    if (el) el.closest('.card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 50);
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -1274,6 +1344,9 @@ function renderDashboard() {
   const curYM  = `${now.getFullYear()}-${pad(now.getMonth()+1)}`;
 
   // ── 섹션 1: 히어로 ──────────────────────────────────────────────────
+  const dateEl = document.getElementById('dbHeroDate');
+  if (dateEl) dateEl.textContent = now.toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric', weekday:'short' });
+
   const totalEl = document.getElementById('dbTotalAmt');
   if (totalEl) totalEl.textContent = fmtAmount(total);
 
@@ -1282,23 +1355,29 @@ function renderDashboard() {
   if (deltaEl) deltaEl.textContent =
     `이번 달 잉여: ${curNet >= 0 ? '+' : ''}${fmtAmount(curNet)}`;
 
-  // 비율 바
+  // 얇은 진행바 — 이번 달 잉여를 순자산 대비 비율로 시각화
   const barEl = document.getElementById('dbAssetBar');
+  if (barEl) {
+    const barPct = total > 0 ? Math.min(100, Math.abs(curNet) / total * 100 * 20) : 0; // 소폭 변동도 눈에 띄게 배율 적용
+    barEl.style.width = Math.max(2, barPct) + '%';
+    barEl.style.background = curNet >= 0 ? 'var(--income)' : 'var(--expense)';
+  }
+
+  // 구성비 요약 — 원형 배지 3개 (부동산 / 주식 / 현금성)
   const legEl = document.getElementById('dbAssetLegend');
-  if (barEl && total > 0) {
+  if (legEl && total > 0) {
+    const cashLike = cash + sv;
     const segs = [
-      { label:'부동산', val:re,   color:'#ec4899' },
-      { label:'주식',   val:pf,   color:'#8b5cf6' },
-      { label:'예적금', val:sv,   color:'#10b981' },
-      { label:'현금',   val:cash, color:'#3b82f6' },
+      { label:'부동산',  val:re,       color:'var(--re)' },
+      { label:'주식',    val:pf,       color:'var(--primary)' },
+      { label:'현금성',  val:cashLike, color:'var(--income)' },
     ];
-    barEl.innerHTML = segs.map(s => {
-      const pct = Math.max(0, Math.round(s.val / total * 100));
-      return pct > 0 ? `<div style="width:${pct}%;background:${s.color};opacity:.85"></div>` : '';
-    }).join('');
     legEl.innerHTML = segs.map(s => {
       const pct = Math.round(s.val / total * 100);
-      return `<span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${s.color};margin-right:3px"></span>${s.label} ${pct}%</span>`;
+      return `<div style="display:flex;flex-direction:column;align-items:center;gap:5px">
+        <div style="width:46px;height:46px;border-radius:50%;background:${s.color};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff">${pct}%</div>
+        <div style="font-size:11px;color:var(--text-sub)">${s.label}</div>
+      </div>`;
     }).join('');
   }
 
@@ -1440,7 +1519,7 @@ const CATEGORIES = {
   income:  ['급여', '사업소득', '임대수입', '투자수익', '기타수입'],
   expense: ['식비', '교통', '주거·관리비', '의료·건강', '교육', '쇼핑·의류', '문화·여가', '통신', '보험', '대출이자', '자녀', '기타지출'],
 };
-const CAT_COLORS = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#f97316','#84cc16','#ec4899','#6366f1','#14b8a6','#78716c'];
+const CAT_COLORS = ['#d97757','#10b981','#f59e0b','#ef4444','#c9a86a','#06b6d4','#f97316','#84cc16','#a8927a','#6366f1','#14b8a6','#78716c'];
 const CAT_ICONS  = { '급여':'💼','사업소득':'🏢','임대수입':'🏠','투자수익':'📈','기타수입':'💰','식비':'🍚','교통':'🚌','주거·관리비':'🏡','의료·건강':'💊','교육':'📚','쇼핑·의류':'👗','문화·여가':'🎬','통신':'📱','보험':'🛡️','대출이자':'🏦','자녀':'👶','기타지출':'📦' };
 
 let state = {
@@ -1704,8 +1783,8 @@ function renderChart() {
     });
     ctx.beginPath();ctx.arc(cx,cy,innerR,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill();
     if(prog===1){
-      ctx.textAlign='center';ctx.fillStyle='#64748b';ctx.font='500 11px -apple-system,sans-serif';
-      ctx.fillText('총 지출',cx,cy-8);ctx.fillStyle='#1e293b';ctx.font='700 14px -apple-system,sans-serif';
+      ctx.textAlign='center';ctx.fillStyle='#8a7f6f';ctx.font='500 11px -apple-system,sans-serif';
+      ctx.fillText('총 지출',cx,cy-8);ctx.fillStyle='#3a3229';ctx.font='700 14px -apple-system,sans-serif';
       ctx.fillText(fmtAmountShort(total)+'원',cx,cy+10);
     }
   }
@@ -2206,7 +2285,7 @@ function renderTimeline() {
 const PF_KEY = 'portfolio_accounts';
 
 // 계좌별 포인트 컬러 (financial-forecast.jsx 색감 참고)
-const PF_ACC_COLORS = ['#f97316','#8b5cf6','#14b8a6','#10b981','#06b6d4','#3b82f6','#ec4899','#f59e0b'];
+const PF_ACC_COLORS = ['#f97316','#c9a86a','#14b8a6','#10b981','#06b6d4','#d97757','#a8927a','#f59e0b'];
 const ASSET_CLASSES = ['해외주식','국내주식','채권','현금성'];
 
 // 기본 계좌 (실제 계좌 구성 반영)
@@ -2219,7 +2298,7 @@ function pfDefaultAccounts() {
         { id:ts(), name:'TIGER 미국나스닥100', avgCost:0, qty:0, currentPrice:0, priceDate:'', assetClass:'해외주식', memo:'월 17만' },
         { id:ts(), name:'KODEX 미국S&P500',   avgCost:0, qty:0, currentPrice:0, priceDate:'', assetClass:'해외주식', memo:'월 33만' },
       ]},
-    { id:2, name:'IRP', color:'#8b5cf6', monthly:250000, owner:'me', isTaxSaving:true,
+    { id:2, name:'IRP', color:'#c9a86a', monthly:250000, owner:'me', isTaxSaving:true,
       joinDate:'', expiryDate:'', note:'퇴직금 수령용 IRP와 반드시 분리 운용', collapsed:false,
       holdings:[
         { id:ts(), name:'TIGER 미국나스닥100',          avgCost:0, qty:0, currentPrice:0, priceDate:'', assetClass:'해외주식', memo:'월 17만' },
@@ -2306,10 +2385,10 @@ function drawPFDonut(canvas, entries) {
 
   if (!total) {
     ctx.beginPath(); ctx.arc(cx, cy, outerR, 0, 2*Math.PI);
-    ctx.fillStyle = '#e2e8f0'; ctx.fill();
+    ctx.fillStyle = '#ede7dd'; ctx.fill();
     ctx.beginPath(); ctx.arc(cx, cy, innerR, 0, 2*Math.PI);
     ctx.fillStyle = '#fff'; ctx.fill();
-    ctx.textAlign='center'; ctx.fillStyle='#94a3b8';
+    ctx.textAlign='center'; ctx.fillStyle='#b0a595';
     ctx.font='11px -apple-system,sans-serif'; ctx.fillText('데이터 없음', cx, cy+4);
     return;
   }
@@ -2325,10 +2404,10 @@ function drawPFDonut(canvas, entries) {
   });
   ctx.beginPath(); ctx.arc(cx, cy, innerR, 0, 2*Math.PI);
   ctx.fillStyle = '#fff'; ctx.fill();
-  ctx.textAlign='center'; ctx.fillStyle='#1e293b';
+  ctx.textAlign='center'; ctx.fillStyle='#3a3229';
   ctx.font='700 13px -apple-system,sans-serif';
   ctx.fillText(fmtAmountShort(total), cx, cy - 4);
-  ctx.fillStyle='#64748b'; ctx.font='500 10px -apple-system,sans-serif';
+  ctx.fillStyle='#8a7f6f'; ctx.font='500 10px -apple-system,sans-serif';
   ctx.fillText('원', cx, cy + 12);
 }
 
@@ -2435,7 +2514,7 @@ function renderPFSummary() {
     `<div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
       <span>👤 본인: <b style="color:#f97316">${fmtAmount(meVal)}</b> <span style="color:${mePnl>=0?'var(--income)':'var(--expense)'}">(${mePnl>=0?'+':''}${fmtAmount(mePnl)})</span></span>
       <span>👦 자녀: <b style="color:#10b981">${fmtAmount(childVal)}</b> <span style="color:${childPnl>=0?'var(--income)':'var(--expense)'}">(${childPnl>=0?'+':''}${fmtAmount(childPnl)})</span></span>
-      <span>🏦 절세계좌: <b style="color:#6d28d9">${fmtAmount(taxVal)}</b></span>
+      <span>🏦 절세계좌: <b style="color:#a8763f">${fmtAmount(taxVal)}</b></span>
     </div>`;
 
   // 도넛1: 계좌별
@@ -2462,10 +2541,10 @@ function renderPFSummary() {
       classMap[cls] = (classMap[cls] || 0) + calcHolding(h).evalAmt;
     });
   });
-  const clsColors = { '해외주식':'#8b5cf6','국내주식':'#3b82f6','채권':'#f59e0b','현금성':'#10b981','기타':'#94a3b8' };
+  const clsColors = { '해외주식':'#c9a86a','국내주식':'#d97757','채권':'#f59e0b','현금성':'#10b981','기타':'#b0a595' };
   const clsEntries = Object.entries(classMap)
     .filter(([,v]) => v > 0)
-    .map(([k,v]) => ({ label:k, value:v, color:clsColors[k]||'#94a3b8' }));
+    .map(([k,v]) => ({ label:k, value:v, color:clsColors[k]||'#b0a595' }));
 
   const c2 = document.getElementById('pfDonut2');
   drawPFDonut(c2, clsEntries);
@@ -2505,7 +2584,7 @@ function renderPFAccounts() {
   const childAccs = pfAccounts.filter(a => a.owner === 'child');
   list.innerHTML =
     renderSection(meAccs,    '👤 내 계좌 (본인)',  '👤', '#f97316', '#fff7ed') +
-    renderSection(childAccs, '👦 아이 계좌 (자녀)', '👦', '#059669', '#f0fdf4');
+    renderSection(childAccs, '👦 아이 계좌 (자녀)', '👦', '#6b8a5f', '#f0fdf4');
 }
 
 function renderOneAccount(acc) {
@@ -2568,7 +2647,7 @@ function renderOneAccount(acc) {
         <div class="holding-computed">
           <div class="hc-item">
             <div class="hc-label">평가금액</div>
-            <div class="hc-value" style="color:#6d28d9">${fmtAmount(evalAmt)}</div>
+            <div class="hc-value" style="color:#a8763f">${fmtAmount(evalAmt)}</div>
           </div>
           <div class="hc-item">
             <div class="hc-label">평가손익</div>
@@ -2983,7 +3062,7 @@ function renderSavingsTab() {
   listEl.innerHTML = arr.map(a => `
     <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
       <span style="font-size:13px;flex:1">${escHtml(a.name)}</span>
-      <span style="font-size:14px;font-weight:600;color:#059669">${fmtAmount(a.amount)}</span>
+      <span style="font-size:14px;font-weight:600;color:#6b8a5f">${fmtAmount(a.amount)}</span>
       <button onclick="deleteSavingsAccount(${a.id})" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:13px;padding:2px 6px">✕</button>
     </div>`).join('');
 }
@@ -3155,10 +3234,10 @@ function _buildRetireSummaryHTML(pa) {
     `⏳ 연금 공백기: <b>${gapYears}년</b> (${retireYear}~${pensionYear}년)<br>` +
     `💸 공백기 필요액: <b>${fmtAmount(gapNeed)}</b><span style="font-size:10px;color:var(--text-muted)"> (월 ${fmtAmount(monthlyNeed)} × ${gapYears*12}개월)</span><br>` +
     `📦 은퇴 시 가용자산: <b>${fmtAmount(totalAtRetire)}</b><span style="font-size:10px;color:var(--text-muted)"> (순자산 + 퇴직금)</span><br>` +
-    `<span style="color:${ok?'#059669':'#dc2626'};font-weight:700">` +
+    `<span style="color:${ok?'#6b8a5f':'#dc2626'};font-weight:700">` +
     `${ok ? `✅ 공백기 후 ${fmtAmount(surplus)} 여유` : `⚠️ ${fmtAmount(Math.abs(surplus))} 부족`}</span><br>` +
     `🏛️ ${pensionYear}년 연금 개시 후: 월 ${fmtAmount(pensionMonthly)} 수령 ` +
-    `<span style="color:${monthlyMargin>=0?'#059669':'#dc2626'}">(생활비 대비 월 ${monthlyMargin>=0?'+':''}${fmtAmount(monthlyMargin)})</span>`;
+    `<span style="color:${monthlyMargin>=0?'#6b8a5f':'#dc2626'}">(생활비 대비 월 ${monthlyMargin>=0?'+':''}${fmtAmount(monthlyMargin)})</span>`;
 }
 function renderRetireSummary(pa) {
   if (!pa) pa = loadPublicAssets();
