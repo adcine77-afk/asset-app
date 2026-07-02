@@ -995,6 +995,22 @@
       <span style="font-size:11px;font-weight:400;color:var(--text-muted);margin-left:6px">Claude API · 참고용</span>
     </div>
 
+    <!-- 모드 선택 토글 -->
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button id="aiModeBtnStock" onclick="setAIMode('stock')"
+              style="flex:1;padding:9px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid #6d28d9;background:#6d28d9;color:#fff">
+        📈 주식 포트폴리오 전용
+      </button>
+      <button id="aiModeBtnTotal" onclick="setAIMode('total')"
+              style="flex:1;padding:9px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid #c4b5fd;background:#fff;color:#6d28d9">
+        🏛️ 종합자산 자문
+      </button>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);margin-bottom:14px;line-height:1.6">
+      💡 부동산·예적금은 변동성이 낮아 종합자산 자문은 가끔(분기 1회 권장),
+      주식 포트폴리오는 시장 변화가 잦으니 필요할 때 자주 확인하세요.
+    </div>
+
     <!-- API 키 입력 -->
     <div id="aiKeySection" style="margin-bottom:14px">
       <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px">Anthropic API 키 (sk-ant-로 시작)</div>
@@ -1018,6 +1034,7 @@
     <!-- 결과 영역 -->
     <div id="aiResult" style="display:none;margin-top:16px">
       <div style="background:#f5f3ff;border:1px solid #c4b5fd;border-radius:8px;padding:16px">
+        <span id="aiResultModeBadge" style="display:inline-block;font-size:11px;font-weight:700;color:#6d28d9;background:#ede9fe;padding:3px 9px;border-radius:20px;margin-bottom:10px"></span>
         <div style="font-size:13px;line-height:1.9;color:var(--text)" id="aiResultText"></div>
         <div style="font-size:11px;color:var(--text-muted);margin-top:10px;padding-top:8px;border-top:1px solid #ddd6fe" id="aiResultTs"></div>
       </div>
@@ -3159,6 +3176,21 @@ function renderPublicTab() {
 //  AI 포트폴리오 자문
 // ══════════════════════════════════════════════════════════════════════
 const AI_KEY_STORAGE = 'ai_advisor_api_key';
+let aiMode = 'stock';   // 'stock' | 'total' — 기본값: 주식 포트폴리오 전용
+
+function setAIMode(mode) {
+  aiMode = mode;
+  const stockBtn = document.getElementById('aiModeBtnStock');
+  const totalBtn = document.getElementById('aiModeBtnTotal');
+  const active   = { border:'1.5px solid #6d28d9', background:'#6d28d9', color:'#fff' };
+  const inactive = { border:'1.5px solid #c4b5fd', background:'#fff',    color:'#6d28d9' };
+  const apply = (btn, style) => { if (!btn) return; btn.style.border = style.border; btn.style.background = style.background; btn.style.color = style.color; };
+  apply(stockBtn, mode === 'stock' ? active : inactive);
+  apply(totalBtn, mode === 'total' ? active : inactive);
+  // 모드 전환 시 이전 결과는 숨김 (새로 자문받기 전까지)
+  const resultEl = document.getElementById('aiResult');
+  if (resultEl) resultEl.style.display = 'none';
+}
 
 function saveAIKey() {
   const val = document.getElementById('aiApiKeyInput')?.value || '';
@@ -3176,9 +3208,8 @@ function loadAIKey() {
   return k;
 }
 
-function buildPortfolioPrompt() {
-  const pa = loadPublicAssets();
-  const { cash, re, pf, sv, total } = calculateTotalAssets();
+function buildAccountsAndClassRatio() {
+  const { pf } = calculateTotalAssets();
 
   // 계좌별 데이터
   const accounts = (pfAccounts || []).map(acc => {
@@ -3187,7 +3218,7 @@ function buildPortfolioPrompt() {
       const pnlPct = c.costAmt > 0 ? ((c.evalAmt - c.costAmt) / c.costAmt * 100).toFixed(1) : '0.0';
       return { name: h.name, evalAmt: c.evalAmt, costAmt: c.costAmt, pnlPct: `${pnlPct}%`, assetClass: h.assetClass };
     });
-    return { name: acc.name, monthly: acc.monthly, total: pfAccountTotal(acc), holdings };
+    return { name: acc.name, owner: acc.owner || 'me', isTaxSaving: !!acc.isTaxSaving, monthly: acc.monthly, total: pfAccountTotal(acc), holdings };
   });
 
   // 자산군 비중
@@ -3202,6 +3233,15 @@ function buildPortfolioPrompt() {
     class: k, pct: pf > 0 ? (v / pf * 100).toFixed(1) + '%' : '0%'
   }));
 
+  return { accounts, classRatio, pf };
+}
+
+// 종합자산 자문용 — 부동산+주식+현금 전체 데이터
+function buildPortfolioPrompt() {
+  const pa = loadPublicAssets();
+  const { cash, re, pf, sv, total } = calculateTotalAssets();
+  const { accounts, classRatio } = buildAccountsAndClassRatio();
+
   return JSON.stringify({
     사용자정보: { 생년: 1977, 현재나이: new Date().getFullYear() - 1977, 은퇴목표: 2031, 국민연금수령예정: pa.pensionYear || 2042, 예상연금월수령액: fmtAmount(pa.pensionAdjusted || 1901000), 공백기: '2031~' + (pa.pensionYear || 2042) + '년' },
     순자산현황: { 전체순자산: fmtAmount(total), 부동산: fmtAmount(re), 주식포트폴리오: fmtAmount(pf), 예적금: fmtAmount(sv), 현금성자산: fmtAmount(cash) },
@@ -3211,6 +3251,21 @@ function buildPortfolioPrompt() {
       절세계좌합계: fmtAmount((pfAccounts||[]).filter(a=>a.isTaxSaving).reduce((s,a)=>s+pfAccountTotal(a),0)),
       계좌별: accounts, 자산군비중: classRatio, 주식비중전체대비: total > 0 ? (pf / total * 100).toFixed(1) + '%' : '0%'
     }
+  }, null, 2);
+}
+
+// 주식 포트폴리오 전용 자문용 — 부동산·예적금·공적자산 제외, 주식 계좌 데이터만
+function buildStockOnlyPrompt() {
+  const { accounts, classRatio, pf } = buildAccountsAndClassRatio();
+
+  return JSON.stringify({
+    사용자정보: { 생년: 1977, 현재나이: new Date().getFullYear() - 1977, 은퇴목표: 2031 },
+    주식포트폴리오총액: fmtAmount(pf),
+    본인계좌합계: fmtAmount((pfAccounts||[]).filter(a=>a.owner!=='child').reduce((s,a)=>s+pfAccountTotal(a),0)),
+    자녀계좌합계: fmtAmount((pfAccounts||[]).filter(a=>a.owner==='child').reduce((s,a)=>s+pfAccountTotal(a),0)),
+    절세계좌합계: fmtAmount((pfAccounts||[]).filter(a=>a.isTaxSaving).reduce((s,a)=>s+pfAccountTotal(a),0)),
+    계좌별: accounts,
+    자산군비중: classRatio
   }, null, 2);
 }
 
@@ -3230,13 +3285,42 @@ async function callAIAdvisor() {
   btn.disabled   = true;
   btn.textContent = '⏳ 분석 중... (10~20초 소요)';
 
-  const systemPrompt = `당신은 워런 버핏의 장기 가치투자 원칙과 레이 달리오의 올웨더 포트폴리오 이론을 결합한 전문 자산관리 어드바이저입니다. 한국의 세제(연금저축/IRP/ISA 세액공제, 연 1,500만원 룰, 양도소득세), 부동산 시장, 재개발 절차를 잘 알고 있습니다. 자녀 계좌는 장기(10년 이상) 관점의 성장 포트폴리오로 운용 중입니다.
+  const systemPromptTotal = `당신은 워런 버핏의 장기 가치투자 원칙과 레이 달리오의 올웨더 포트폴리오 이론을 결합한 전문 자산관리 어드바이저입니다. 한국의 세제(연금저축/IRP/ISA 세액공제, 연 1,500만원 룰, 양도소득세), 부동산 시장, 재개발 절차를 잘 알고 있습니다. 자녀 계좌는 장기(10년 이상) 관점의 성장 포트폴리오로 운용 중입니다.
 사용자의 데이터를 분석해서 다음 4가지를 한국어로 답변하세요:
 1. 현재 포트폴리오의 강점과 리스크 (간결하게)
 2. 자산 배분 개선 제안 (은퇴 공백기 2031~2042를 반드시 고려)
 3. 계좌별 종목 배치 최적화 조언 (절세 효율 포함)
 4. 향후 3년 내 우선 실행 액션 3가지
 주의: 이 답변은 참고용 의견이며, 실제 투자 결정은 본인 판단과 전문가 상담을 병행하세요.`;
+
+  const systemPromptStock = `당신은 워런 버핏의 가치투자 원칙(이해할 수 있는 사업, 경제적 해자, 장기보유, "왜 이 종목을 보유하는지 한 문장으로 설명 못하면 보유하지 마라")과 레이 달리오의 올웨더 포트폴리오 이론(경제 국면에 관계없이 견디는 자산배분, 상관관계 낮은 자산 조합)을 결합해 주식 포트폴리오만 평가하는 전문 어드바이저입니다.
+
+부동산이나 전체 순자산은 이번 분석에서 다루지 않고, 오직 주식·ETF 포트폴리오(계좌 구성, 종목별 비중, 자산군 배분)만 집중 분석합니다.
+
+사용자 데이터를 바탕으로 다음 항목을 한국어로 답변하세요:
+
+1. 버핏 관점 평가
+   - 인덱스/우량주 중심 구조는 유지할 가치가 있는지
+   - "이해하기 어렵거나 해자가 불명확한" 테마형 종목이 있는지 짚어줄 것
+   - 각 종목/ETF에 대해 "왜 보유하는지 설명 가능한가" 기준 적용
+
+2. 달리오 관점 평가
+   - 현재 포트폴리오가 특정 매크로 국면(예: 성장+저금리)에만 베팅되어 있지 않은지
+   - 채권/현금성 비중이 은퇴 시점(2031년) 대비 적절한지
+   - 상관관계가 높은 자산끼리 몰려있지 않은지
+
+3. 계좌별 구체적 제안
+   - 절세계좌(연금저축/IRP/ISA)와 자녀계좌 각각에 대해
+   - 유지할 것 / 비중 조정할 것 / 재검토할 것으로 구분
+
+4. 다음 자문까지 지켜볼 관전 포인트 2~3가지
+   (다음에 이 모드로 다시 자문받을 때 무엇이 바뀌었는지 확인할 기준점)
+
+말투는 직설적이고 명확하게. 애매한 표현("고려해볼 수 있습니다") 대신 구체적 판단("~는 재검토가 필요합니다", "~는 유지할 가치가 있습니다")으로 답하세요.`;
+
+  const isStockMode   = aiMode === 'stock';
+  const systemPrompt  = isStockMode ? systemPromptStock : systemPromptTotal;
+  const promptData    = isStockMode ? buildStockOnlyPrompt() : buildPortfolioPrompt();
 
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -3251,7 +3335,7 @@ async function callAIAdvisor() {
         model: 'claude-sonnet-4-6',
         max_tokens: 1500,
         system: systemPrompt,
-        messages: [{ role: 'user', content: `아래는 제 자산 현황 데이터입니다. 분석해주세요:\n\n${buildPortfolioPrompt()}` }]
+        messages: [{ role: 'user', content: `아래는 제 ${isStockMode ? '주식 포트폴리오' : '자산 현황'} 데이터입니다. 분석해주세요:\n\n${promptData}` }]
       })
     });
 
@@ -3269,6 +3353,7 @@ async function callAIAdvisor() {
       .replace(/\n\n/g, '<br><br>')
       .replace(/\n/g, '<br>');
 
+    document.getElementById('aiResultModeBadge').textContent = isStockMode ? '📈 주식 포트폴리오 전용 자문' : '🏛️ 종합자산 자문';
     document.getElementById('aiResultText').innerHTML = html;
     document.getElementById('aiResultTs').textContent =
       `생성일시: ${new Date().toLocaleString('ko-KR')} · 모델: claude-sonnet-4-6`;
