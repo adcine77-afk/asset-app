@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T16:36:42+09:00",
+  "updated": "2026-08-18T10:47:50+09:00",
   "note": "본 데이터는 자동 수집된 참고용 데이터입니다. 지연되거나 부정확할 수 있습니다.",
   "sources": {
     "korea": "네이버 금융 모바일 API (m.stock.naver.com)",
@@ -7,83 +7,83 @@
   },
   "prices": {
     "삼성전자": {
-      "price": 274500.0,
+      "price": 279500.0,
       "currency": "KRW",
       "code": "005930",
       "source": "네이버금융"
     },
     "SK하이닉스": {
-      "price": 1645000.0,
+      "price": 1738000.0,
       "currency": "KRW",
       "code": "000660",
       "source": "네이버금융"
     },
     "두산에너빌리티": {
-      "price": 82600.0,
+      "price": 81250.0,
       "currency": "KRW",
       "code": "034020",
       "source": "네이버금융"
     },
     "TIGER 미국나스닥100": {
-      "price": 188575.0,
+      "price": 186985.0,
       "currency": "KRW",
       "code": "133690",
       "source": "네이버금융"
     },
     "TIGER 나스닥100": {
-      "price": 188575.0,
+      "price": 186985.0,
       "currency": "KRW",
       "code": "133690",
       "source": "네이버금융"
     },
     "KODEX 미국S&P500": {
-      "price": 24910.0,
+      "price": 24615.0,
       "currency": "KRW",
       "code": "379800",
       "source": "네이버금융"
     },
     "KODEX 미국10년국채액티브(H)": {
-      "price": 7265.0,
+      "price": 7165.0,
       "currency": "KRW",
       "code": "304660",
       "source": "네이버금융"
     },
     "ACE 반도체TOP4Plus": {
-      "price": 36240.0,
+      "price": 37740.0,
       "currency": "KRW",
       "code": "396500",
       "source": "네이버금융"
     },
     "KODEX SMR": {
-      "price": 27625.0,
+      "price": 28030.0,
       "currency": "KRW",
       "code": "411060",
       "source": "네이버금융"
     },
     "KODEX200": {
-      "price": 110060.0,
+      "price": 112250.0,
       "currency": "KRW",
       "code": "069500",
       "source": "네이버금융"
     },
     "RISE 코리아밸류업": {
-      "price": 30150.0,
+      "price": 29580.0,
       "currency": "KRW",
       "code": "466920",
       "source": "네이버금융"
     },
     "NVDA": {
-      "price": 225.16,
+      "price": 225.01,
       "currency": "USD",
       "source": "Yahoo Finance"
     },
     "PLTR": {
-      "price": 174.04,
+      "price": 172.55,
       "currency": "USD",
       "source": "Yahoo Finance"
     },
     "IONQ": {
-      "price": 46.26,
+      "price": 46.84,
       "currency": "USD",
       "source": "Yahoo Finance"
     }
