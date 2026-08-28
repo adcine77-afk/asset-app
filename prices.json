@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-28T20:18:34+09:00",
+  "updated": "2026-08-29T03:59:17+09:00",
   "note": "본 데이터는 자동 수집된 참고용 데이터입니다. 지연되거나 부정확할 수 있습니다.",
   "sources": {
     "korea": "네이버 금융 모바일 API (m.stock.naver.com)",
@@ -73,17 +73,17 @@
       "source": "네이버금융"
     },
     "NVDA": {
-      "price": 227.98,
+      "price": 217.21,
       "currency": "USD",
       "source": "Yahoo Finance"
     },
     "PLTR": {
-      "price": 185.93,
+      "price": 185.74,
       "currency": "USD",
       "source": "Yahoo Finance"
     },
     "IONQ": {
-      "price": 42.46,
+      "price": 38.928,
       "currency": "USD",
       "source": "Yahoo Finance"
     }
