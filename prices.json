@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T13:18:10+09:00",
+  "updated": "2026-09-03T20:41:38+09:00",
   "note": "본 데이터는 자동 수집된 참고용 데이터입니다. 지연되거나 부정확할 수 있습니다.",
   "sources": {
     "korea": "네이버 금융 모바일 API (m.stock.naver.com)",
@@ -7,67 +7,67 @@
   },
   "prices": {
     "삼성전자": {
-      "price": 254000.0,
+      "price": 250000.0,
       "currency": "KRW",
       "code": "005930",
       "source": "네이버금융"
     },
     "SK하이닉스": {
-      "price": 1638000.0,
+      "price": 1596000.0,
       "currency": "KRW",
       "code": "000660",
       "source": "네이버금융"
     },
     "두산에너빌리티": {
-      "price": 81200.0,
+      "price": 79200.0,
       "currency": "KRW",
       "code": "034020",
       "source": "네이버금융"
     },
     "TIGER 미국나스닥100": {
-      "price": 175582.0,
+      "price": 175270.0,
       "currency": "KRW",
       "code": "133690",
       "source": "네이버금융"
     },
     "TIGER 나스닥100": {
-      "price": 175582.0,
+      "price": 175270.0,
       "currency": "KRW",
       "code": "133690",
       "source": "네이버금융"
     },
     "KODEX 미국S&P500": {
-      "price": 23495.0,
+      "price": 23485.0,
       "currency": "KRW",
       "code": "379800",
       "source": "네이버금융"
     },
     "KODEX 미국10년국채액티브(H)": {
-      "price": 7255.0,
+      "price": 7260.0,
       "currency": "KRW",
       "code": "304660",
       "source": "네이버금융"
     },
     "ACE 반도체TOP4Plus": {
-      "price": 34140.0,
+      "price": 33395.0,
       "currency": "KRW",
       "code": "396500",
       "source": "네이버금융"
     },
     "KODEX SMR": {
-      "price": 27180.0,
+      "price": 27155.0,
       "currency": "KRW",
       "code": "411060",
       "source": "네이버금융"
     },
     "KODEX200": {
-      "price": 105440.0,
+      "price": 103610.0,
       "currency": "KRW",
       "code": "069500",
       "source": "네이버금융"
     },
     "RISE 코리아밸류업": {
-      "price": 27810.0,
+      "price": 27510.0,
       "currency": "KRW",
       "code": "466920",
       "source": "네이버금융"
