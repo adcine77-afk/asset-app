@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-13T23:32:43+09:00",
+  "updated": "2026-10-14T13:46:55+09:00",
   "note": "본 데이터는 자동 수집된 참고용 데이터입니다. 지연되거나 부정확할 수 있습니다.",
   "sources": {
     "korea": "네이버 금융 모바일 API (m.stock.naver.com)",
@@ -7,13 +7,13 @@
   },
   "prices": {
     "삼성전자": {
-      "price": 234000.0,
+      "price": 237000.0,
       "currency": "KRW",
       "code": "005930",
       "source": "네이버금융"
     },
     "SK하이닉스": {
-      "price": 1456000.0,
+      "price": 1453000.0,
       "currency": "KRW",
       "code": "000660",
       "source": "네이버금융"
@@ -25,19 +25,19 @@
       "source": "네이버금융"
     },
     "TIGER 미국나스닥100": {
-      "price": 181150.0,
+      "price": 181455.0,
       "currency": "KRW",
       "code": "133690",
       "source": "네이버금융"
     },
     "TIGER 나스닥100": {
-      "price": 181150.0,
+      "price": 181455.0,
       "currency": "KRW",
       "code": "133690",
       "source": "네이버금융"
     },
     "KODEX 미국S&P500": {
-      "price": 23650.0,
+      "price": 23615.0,
       "currency": "KRW",
       "code": "379800",
       "source": "네이버금융"
@@ -49,41 +49,41 @@
       "source": "네이버금융"
     },
     "ACE 반도체TOP4Plus": {
-      "price": 33095.0,
+      "price": 33145.0,
       "currency": "KRW",
       "code": "396500",
       "source": "네이버금융"
     },
     "KODEX SMR": {
-      "price": 25275.0,
+      "price": 24965.0,
       "currency": "KRW",
       "code": "411060",
       "source": "네이버금융"
     },
     "KODEX200": {
-      "price": 95250.0,
+      "price": 96195.0,
       "currency": "KRW",
       "code": "069500",
       "source": "네이버금융"
     },
     "RISE 코리아밸류업": {
-      "price": 23035.0,
+      "price": 23515.0,
       "currency": "KRW",
       "code": "466920",
       "source": "네이버금융"
     },
     "NVDA": {
-      "price": 225.31,
+      "price": 228.52,
       "currency": "USD",
       "source": "Yahoo Finance"
     },
     "PLTR": {
-      "price": 208.245,
+      "price": 208.67,
       "currency": "USD",
       "source": "Yahoo Finance"
     },
     "IONQ": {
-      "price": 35.105,
+      "price": 34.73,
       "currency": "USD",
       "source": "Yahoo Finance"
     }
