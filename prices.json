@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-24T18:46:27+09:00",
+  "updated": "2026-11-25T03:15:32+09:00",
   "note": "본 데이터는 자동 수집된 참고용 데이터입니다. 지연되거나 부정확할 수 있습니다.",
   "sources": {
     "korea": "네이버 금융 모바일 API (m.stock.naver.com)",
@@ -7,19 +7,19 @@
   },
   "prices": {
     "삼성전자": {
-      "price": 185400.0,
+      "price": 182900.0,
       "currency": "KRW",
       "code": "005930",
       "source": "네이버금융"
     },
     "SK하이닉스": {
-      "price": 1129000.0,
+      "price": 1113000.0,
       "currency": "KRW",
       "code": "000660",
       "source": "네이버금융"
     },
     "두산에너빌리티": {
-      "price": 41900.0,
+      "price": 41450.0,
       "currency": "KRW",
       "code": "034020",
       "source": "네이버금융"
@@ -73,17 +73,17 @@
       "source": "네이버금융"
     },
     "NVDA": {
-      "price": 165.05,
+      "price": 153.065,
       "currency": "USD",
       "source": "Yahoo Finance"
     },
     "PLTR": {
-      "price": 159.36,
+      "price": 162.255,
       "currency": "USD",
       "source": "Yahoo Finance"
     },
     "IONQ": {
-      "price": 23.34,
+      "price": 22.345,
       "currency": "USD",
       "source": "Yahoo Finance"
     }
